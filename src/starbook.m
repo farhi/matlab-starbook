@@ -42,6 +42,8 @@ classdef starbook < handle
   % 
   % rubytelescopeserver: Rob Burrowes 2013
   %   https://github.com/rbur004/rubytelescopeserver
+  %
+  % (c) E. Farhi, GPL2 - version 18.02.03
 
   properties
     ip        = '169.254.1.1';  % default IP as set in StarBook

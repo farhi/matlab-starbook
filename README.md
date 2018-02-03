@@ -1,16 +1,7 @@
 # matlab-starbook
 Control a Vixen SX mount StarBook from Matlab
 
-<p align="center">
-
-                          <br>
-                          E. Farhi [farhi@ill.fr]
-                          <br>
-                          Version 18.02.03
-
-<br>
-<img src="https://github.com/farhi/matlab-starbook/blob/master/src/Starbook.jpg" style="width: 50%; height: 50%">
-</p>
+![Image of StarBook](https://github.com/farhi/matlab-starbook/blob/master/src/Starbook.jpg)
 
 Purpose
 -------

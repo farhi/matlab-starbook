@@ -9,8 +9,7 @@ Control a Vixen SX mount StarBook from Matlab
                           Version 18.02.03
 
 <br>
-<img src="https://github.com/farhi/matlab-starbook/blob/master/src/Starbook.jpg
-</p>" style="width: 50%; height: 50%">
+<img src="https://github.com/farhi/matlab-starbook/blob/master/src/Starbook.jpg" style="width: 50%; height: 50%">
 </p>
 
 Purpose

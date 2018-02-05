@@ -10,14 +10,12 @@ classdef starbook < handle
   %
   %   sb = starbook('169.254.1.1');
   %
-  % to establish the connection.
-  % The easiest is to display the starbook screen image with
-  %
-  %   sb.image
+  % to establish the connection and display the StarBook screen.
   %
   % The buttons are active in a similar way to the physical ones. The mouse
   % wheel allows to zoom in/out, and the display is regularly updated (5 sec).
-  % You can access more actions from the top menu.
+  % You can access more actions from the top menu, and unactivate the 
+  % auto-update.
   %
   % Methods:
   %   starbook(ip):   connect to a StarBook controller
@@ -35,6 +33,11 @@ classdef starbook < handle
   %   getstatus(sb):  update the StarBook state
   %   getxy(sb):      update motor coders     
   %   getscreen(sb):  get the StarBook image as an RGB matrix
+  %   update(sb):     update status and image
+  %   plot(sb):       same as image(sb)
+  %   web(sb):        show the current target on sky-map.org
+  %   zoom(sb,{z}):   get/set the zoom level. z can be 'in','out' or in 0-8
+  %   date(sb):       get the starbook date/time
   %
   % Credits: 
   % urldownload : version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016
@@ -69,6 +72,14 @@ classdef starbook < handle
       % sb=starbook(ip): start communication an given IP and initialize the StarBook
       if nargin
         sb.ip         = ip;
+      else
+        prompt = {'Enter StarBook IP (e.g. 169.254.1.1)'};
+        name = 'StarBook: Set IP';
+        options.Resize='on';
+        options.WindowStyle='normal';
+        options.Interpreter='tex';
+        answer=inputdlg(prompt,name, 1, {sb.ip}, options);
+        if isempty(answer), error([ mfilename ': initialization aborted.' ]); else sb.ip = answer{1}; end
       end
       disp([ mfilename ': Connecting to ' sb.ip ])
       ret = queue(sb.ip, 'getversion', 'version=%s');
@@ -77,7 +88,7 @@ classdef starbook < handle
       end
       sb.version    = char(queue(sb.ip, 'getversion', 'version=%s'));
       sb.place      = queue(sb.ip, 'getplace',   'longitude=%c%d+%d&latitude=%c%d+%d&timezone=%d');
-      sb.start_time = queue(sb.ip, 'gettime',    'time=%d+%d+%d+%d+%d+%d');
+      sb.start_time = date(sb);
       % round: This is a full circle on the dec and ra motors in y or x coordinates.
       sb.round      = queue(sb.ip, 'getround',   'ROUND=%d');
       % make sure we go to SCOPE mode
@@ -86,7 +97,8 @@ classdef starbook < handle
       start(sb);
       setspeed(sb, 6);
       disp([ mfilename ': [' datestr(now) '] Welcome to StarBook ' sb.version ])
-    end
+      image(sb);
+    end % starbook
     
     function s = getstatus(self)
       % s=getstatus(sb): update object with current status
@@ -111,7 +123,7 @@ classdef starbook < handle
         s = sprintf('RA=%d+%f DEC=%d+%f [%4s]', ...
           self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state);
       end
-    end
+    end % getstatus
 
     function gotoradec(self, ra_h, ra_min, dec_deg, dec_min)
       % gotoradec(sb,ra_h, ra_min, dec_deg, dec_min): send the mount to given RA/DEC
@@ -126,12 +138,27 @@ classdef starbook < handle
       %   a single number
       %   a vector [DEG,M] or [DEG,M,S]
       %   a string such as DEG°MM'SS", DEG°MM'
+      %
+      % When RA and DEC are not given, a dialogue box is shown.
       %                
       %  Can return:
       %     ERROR:FORMAT	
       %     ERROR:ILLEGAL STATE	
       %     ERROR:BELOW HORIZON
-      if nargin == 3
+      if nargin == 1
+        prompt = {'Enter Right Ascension RA (HHhMMmSSs or HH:MM:SS or HH.hh)', ...
+               'Enter Declinaison DEC (DD°MM''SS" or DD°MM or DD.dd)' };
+        name = 'StarBook: Goto RA/DEC: Set TARGET';
+        options.Resize='on';
+        options.WindowStyle='normal';
+        options.Interpreter='tex';
+        answer=inputdlg(prompt,name, 1, {'',''}, options);
+        if isempty(answer), return; end
+        ra  = getra(answer{1});
+        dec = getra(answer{2});
+        gotoradec(self, ra, dec);
+        return
+      elseif nargin == 3
         % Declinaison
         [dec_deg, dec_min] = getdec(ra_min);
         % Right Ascension
@@ -150,13 +177,13 @@ classdef starbook < handle
         self.target_dec.deg, self.target_dec.min);
       disp([ mfilename ': [' datestr(now) '] ' cmd ]);
       queue(self.ip, cmd, 'OK');
-    end
+    end % gotoradec
     
     function home(self)
       % home(sb): send mount to home position
       disp([ mfilename ': [' datestr(now) '] home' ]);
       queue(self.ip, 'gohome?home=0','OK');
-    end
+    end % home
     
     function move(self, north, south, east, west)
       % move(sb, north, south, east, west): move continuously the mount in given direction. 
@@ -166,18 +193,34 @@ classdef starbook < handle
       %   south: when 1, start move in DEC-
       %   east:  when 1, start move in RA-
       %   west:  when 1, start move in RA+
+      %
+      % You may as well use move(sb, 'north') or move(sb, 'ra+') or move(sb, 'up')
+      % and similar stuff for other directions.
       % Can return: ERROR:FORMAT
-      if nargin < 5
+      if nargin == 2
+        d = north;
+        north=0; south=0; east=0; west=0;
+        switch d
+        case {'north''dec+','up'}
+          north=1;
+        case {'south','dec-','down'}
+          south=1;
+        case {'ra+','east','left'}
+          east=1;
+        case {'ra-','west','right'}
+          west=1;
+        end
+      elseif nargin < 5
         north=0; south=0; east=0; west=0; 
       end
-      north = sign(north);
-      south = sign(south);
-      east  = sign(east);
-      west  = sign(west);
+      north = logical(north);
+      south = logical(south);
+      east  = logical(east);
+      west  = logical(west);
       queue(self.ip, ...
         sprintf('move?north=%i&south=%i&east=%i&west=%i', north, south, east, west), ...
         'OK');
-    end
+    end % move
     
     function setspeed(self, speed)
       % setspeed(sb, speed): set the mount speed/zoom factor from 0(stop) - 8(fast)
@@ -189,25 +232,25 @@ classdef starbook < handle
       self.speed = round(speed);
       queue(self.ip, sprintf('setspeed?speed=%i', self.speed), 'OK');
       
-    end
+    end % setspeed
     
     function s = getspeed(self)
       % getspeed(sb): return current speed
       s = self.speed;
-    end
+    end % getspeed
     
     function stop(self)
       % stop(sb): stop any movement
       %  Can return "ERROR:ILLEGAL STATE".
       queue(self.ip, 'stop','OK');
       move(self, 0,0,0,0);
-    end
+    end % stop
     
     function start(self)
       % start(sb): clear any error, and set the mount in move mode
       %  Can return "ERROR:ILLEGAL STATE".
       queue(self.ip, 'start');
-    end
+    end % start
     
     function align(self)
       % align(sb): align the mount to any preset RA/DEC target
@@ -216,7 +259,7 @@ classdef starbook < handle
       disp([ mfilename ': [' datestr(now) '] align' ]);
       queue(self.ip, 'align','OK');
       % display target and current RA/DEC
-    end
+    end % align
     
     function getxy(self)
       % getxy(sb): update mount motors coder values
@@ -237,7 +280,7 @@ classdef starbook < handle
       if abs(abs(self.y) - self.round/2) < self.round/2/10
         disp([ mfilename ': mount is close to reverse on YX (north-south=DEC) motor.' ])
       end
-    end
+    end % getxy
     
     function W = getscreen(self)
       % im=getscreen(self): get an image of the current StarBook screen
@@ -254,17 +297,18 @@ classdef starbook < handle
       [status,raw] = urldownload(cmd);
 
       W = im12toim24(raw);
-    end
+    end % getscreen
     
-    function image(self)
+    function h = image(self)
       % image(sb): show the StarBook screen and allow control using mouse/menu.
       
       % select figure
       ud.StarBook      = self;
       ud.clicked_button='';
-      h = findobj('Tag','StarBook');
+      tag = [ 'StarBook_' strrep(self.ip, '.', '_') ];
+      h = findobj('Tag',tag);
       if isempty(h)
-        h = figure('Tag','StarBook', 'Name', [ 'StarBook: ' self.ip ], ...
+        h = figure('Tag',tag, 'Name', [ 'StarBook: ' self.ip ], ...
           'MenuBar','none', 'ToolBar','none', ...
           'WindowButtonUpFcn',    @ButtonUpCallback, ...
           'WindowScrollWheelFcn', @ScrollWheelCallback, ...
@@ -309,7 +353,61 @@ classdef starbook < handle
         set(hi, 'UserData', ud);
         set(hi, 'ButtonDownFcn',        @ButtonDownCallback);, ...
       end
+    end % image
+    
+    function update(self)
+      % update(sb): update the starbook status and image
+      getstatus(self);
+      image(self);
+    end % update
+    
+    function d = date(self)
+      % date(sb): get the starbook date/time
+      d = queue(self.ip, 'gettime',    'time=%d+%d+%d+%d+%d+%d');
+      d = datestr(double(cell2mat(d)));
     end
+    
+    function h = plot(self)
+      % plot(sb): plot the starbook screen (same as image)
+      h = image(self);
+    end % plot
+    
+    function z = zoom(self, z)
+      % zoom(sb): get/set zoom level
+      %
+      %   zoom(sb, 'in')
+      %   zoom(sb, 'out')
+      %   zoom(sb, 0-8)
+      %   zoom(sb, 'reset')
+      if nargin == 2
+        if ischar(z)
+          switch z
+          case 'reset'
+            z = 6;
+          case 'in'
+            z = getspeed(self)-1;
+          case 'out'
+            z = getspeed(self)+1;
+          otherwise
+            z = 6;
+          end
+        end 
+        setspeed(self, z);
+      else
+        z = getspeed(self);
+      end
+    end % zoom
+    
+    function url = web(self)
+      % web(sb): display the starbook RA/DEC target in a web browser (sky-map.org)
+      self.getstatus;
+      url = sprintf([ 'http://www.sky-map.org/?ra=%f&de=%f&zoom=%d' ...
+      '&show_grid=1&show_constellation_lines=1' ...
+      '&show_constellation_boundaries=1&show_const_names=0&show_galaxies=1' ], ...
+      self.ra.h+self.ra.min/60.0, self.dec.deg+self.dec.min/60.0, 9-self.getspeed);
+      % open in system browser
+      open_system_browser(url);
+    end % web
   
   end % methods
   
@@ -462,7 +560,7 @@ function ret=open_system_browser(url)
   else
     [ret, message]=system([ precmd 'xdg-open "' url '"']);
   end
-end
+end % open_system_browser
 
 % ------------------------------------------------------------------------------
 % Callbacks
@@ -522,17 +620,11 @@ function ButtonDownCallback(src, evnt)
   switch lower(strtok(lab))
   case 'sky'
     sb.getstatus;
-    url = sprintf([ 'http://www.sky-map.org/?ra=%f&de=%f&zoom=%d' ...
-      '&show_grid=1&show_constellation_lines=1' ...
-      '&show_constellation_boundaries=1&show_const_names=0&show_galaxies=1' ], ...
-      sb.ra.h+sb.ra.min/60.0, sb.dec.deg+sb.dec.min/60.0, 9-sb.getspeed);
-    % open in system browser
-    disp(url)
-    open_system_browser(url, 'system');
+    web(sb);
   case 'zoom+'
-    sb.setspeed(sb.getspeed-1);
+    sb.zoom('in');
   case 'zoom-'
-    sb.setspeed(sb.getspeed+1);
+    sb.zoom('out');
   case 'align'
     sb.align;
   case {'stop','unset','lower panel'}
@@ -552,8 +644,7 @@ function ButtonDownCallback(src, evnt)
   case 'chart'
     % select object from name and propose to GO there
   case 'update'
-    sb.getstatus;
-    sb.image;
+    sb.update;
   case 'about'
     try
       im = imread(fullfile(fileparts(which(mfilename)),'Starbook.jpg'));
@@ -580,19 +671,9 @@ function ButtonDownCallback(src, evnt)
     url = sprintf('https://maps.google.fr/?q=%f,%f', n, e);
     % open in system browser
     disp(url)
-    open_system_browser(url, 'system');
+    open_system_browser(url);
    case {'goto','target'}
-     prompt = {'Enter Right Ascension RA (HHhMMmSSs or HH:MM:SS or HH.hh)', ...
-               'Enter Declinaison DEC (DD°MM''SS" or DD°MM or DD.dd)' };
-     name = 'Goto RA/DEC: Set TARGET';
-     options.Resize='on';
-     options.WindowStyle='normal';
-     options.Interpreter='tex';
-     answer=inputdlg(prompt,name, 1, {'',''}, options);
-     if isempty(answer), return; end
-     ra  = getra(answer{1});
-     dec = getra(answer{2});
-     sb.gotoradec(ra, dec);
+     sb.gotoradec;
   end
 end % ButtonDownCallback
 
@@ -656,7 +737,7 @@ end % ScrollWheelCallback
 function TimerCallback(src, evnt)
   % TimerCallback: update view from timer event
   sb = get(src, 'UserData');
-  sb.image;
+  sb.update;
 end % TimerCallback
 
 

@@ -154,17 +154,17 @@ classdef starbook < handle
         options.Resize='on';
         options.WindowStyle='normal';
         options.Interpreter='tex';
-        answer=inputdlg(prompt,name, 1, {'',''}, options);
+        answer=inputdlg(prompt,name, 1, ...
+          {sprintf('%dh%fm',   self.ra.h, self.ra.min), ...
+           sprintf('%ddeg%fm', self.dec.deg, self.dec.min)}, options);
         if isempty(answer), return; end
-        ra  = getra(answer{1});
-        dec = getra(answer{2});
-        gotoradec(self, ra, dec);
+        gotoradec(self, answer{1}, answer{2});
         return
       elseif nargin == 3
         % Declinaison
-        [dec_deg, dec_min] = getdec(ra_min);
+        [dec_deg, dec_min] = getdec(ra_min)
         % Right Ascension
-        [ra_h, ra_min]     = getra(ra_h);
+        [ra_h, ra_min]     = getra(ra_h)
       elseif nargin < 5
         disp([ mfilename ': gotoradec: wrong number of input.' ])
         return
@@ -202,14 +202,14 @@ classdef starbook < handle
       if nargin == 2
         d = north;
         north=0; south=0; east=0; west=0;
-        switch d
-        case {'north''dec+','up'}
+        switch lower(d)
+        case {'north''dec+','up','n'}
           north=1;
-        case {'south','dec-','down'}
+        case {'south','dec-','down','s'}
           south=1;
-        case {'ra+','east','left'}
+        case {'ra+','east','left','e'}
           east=1;
-        case {'ra-','west','right'}
+        case {'ra-','west','right','w'}
           west=1;
         end
       elseif nargin < 5
@@ -263,7 +263,7 @@ classdef starbook < handle
       % display target and current RA/DEC
     end % align
     
-    function getxy(self)
+    function s=getxy(self)
       % getxy(sb): update mount motors coder values
       xy     = queue(self.ip, 'getxy', 'X=%d&Y=%d');
       [self.x,self.y] = deal(xy{:});
@@ -281,6 +281,9 @@ classdef starbook < handle
       end
       if abs(abs(self.y) - self.round/2) < self.round/2/10
         disp([ mfilename ': mount is close to reverse on YX (north-south=DEC) motor.' ])
+      end
+      if nargout
+        s = sprintf('X=%d Y=%d', self.x, self.y);
       end
     end % getxy
     
@@ -318,7 +321,7 @@ classdef starbook < handle
           'UserData', ud);
         % add menu entries
         m = uimenu(h, 'Label', 'StarBook');
-        uimenu(m, 'Label', 'Goto RA/DEC',  'Callback', @MenuCallback, 'Accelerator','g');
+        uimenu(m, 'Label', 'Goto RA/DEC...',  'Callback', @MenuCallback, 'Accelerator','g');
         uimenu(m, 'Label', 'Stop',  'Callback', @MenuCallback, 'Accelerator','s');
         uimenu(m, 'Label', 'Align', 'Callback', @MenuCallback);
         uimenu(m, 'Label', 'Zoom+', 'Callback', @MenuCallback);
@@ -385,7 +388,7 @@ classdef starbook < handle
       %   zoom(sb, 'reset')
       if nargin == 2
         if ischar(z)
-          switch z
+          switch lower(z)
           case 'reset'
             z = 6;
           case 'in'
@@ -413,9 +416,10 @@ classdef starbook < handle
       open_system_browser(url);
     end % web
     
-    function help(self)
+    function url=help(self)
       % help(sb): open the Help page
-      open_system_browser(fullfile(fileparts(which(mfilename)),'doc','Starbook.html'));
+      url = fullfile('file:///',fileparts(which(mfilename)),'doc','StarBook.html');
+      open_system_browser(url);
     end
   
   end % methods
@@ -501,7 +505,8 @@ function [ra_h, ra_min] = getra(ra)
   % getra: convert any input RA into h and min
   ra_h = []; ra_min = [];
   if ischar(ra)
-    ra = repradec(ra);
+  ra
+    ra = repradec(ra)
   end
   if isnumeric(ra)
     if isscalar(ra)
@@ -520,7 +525,7 @@ end % getra
 function str = repradec(str)
   %repradec: replace string stuff and get it into num
   str = lower(str);
-  for rep = {'m','s',':','°','deg','d','''','"'}
+  for rep = {'h','m','s',':','°','deg','d','''','"'}
     str = strrep(str, rep{1}, ' ');
   end
   str = str2num(str);
@@ -529,7 +534,7 @@ end
 function [dec_deg, dec_min] = getdec(dec)
   % getdec: convert any input DEC into deg and min
   if ischar(dec)
-    dec = repradec(dec);
+    dec = repradec(dec)
   end
   if isnumeric(dec)
     if isscalar(dec)
@@ -619,7 +624,7 @@ function ButtonDownCallback(src, evnt)
   set(gcf, 'UserData', ud);
   sb = ud.StarBook;
   % when in GOTO state, any key -> STOP
-  if strncmp(sb.status, 'GOT', 3)
+  if strncmp(sb.state, 'GOT', 3)
     sb.stop;
     return
   end

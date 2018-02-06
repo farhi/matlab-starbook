@@ -1,0 +1,608 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>StarBook: Help</title>
+  </head>
+  <body>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <h1 style="box-sizing: border-box; font-size: 2em; margin-top: 0px
+      !important; margin-right: 0px; margin-bottom: 16px; margin-left:
+      0px; font-weight: 600; line-height: 1.25; padding-bottom: 0.3em;
+      border-bottom: 1px solid rgb(234, 236, 239); color: rgb(36, 41,
+      46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
+      UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
+      Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
+      Symbol&quot;; font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; letter-spacing: normal; orphans: 2;
+      text-align: start; text-indent: 0px; text-transform: none;
+      white-space: normal; widows: 2; word-spacing: 0px;
+      -webkit-text-stroke-width: 0px; text-decoration-style: initial;
+      text-decoration-color: initial;" align="center">matlab-starbook</h1>
+    <div align="center">Control a Vixen SX mount StarBook from Matlab<br>
+      <i>Version 18.02.06 - (c) E. Farhi.</i><br>
+    </div>
+    <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
+      16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
+      padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
+      239); color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><a
+        href="https://github.com/farhi/matlab-starbook#purpose"
+        aria-hidden="true" class="anchor" id="user-content-purpose"
+        style="box-sizing: border-box; background-color: transparent;
+        color: rgb(3, 102, 214); text-decoration: none; float: left;
+        padding-right: 4px; margin-left: -20px; line-height: 1;"><svg
+          aria-hidden="true" class="octicon octicon-link" height="16"
+          version="1.1" viewBox="0 0 16 16" width="16"><path
+            fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3
+            4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2
+            3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98
+            0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12
+            13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64
+            1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9
+            13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Purpose</h2>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">STARBOOK:
+
+      this is a Matlab class to control the Vixen <a
+        href="https://www.vixenoptics.co.uk/Pages/star_book.htm">StarBook</a>
+      for telescope mounts. Compatibility with the <a
+        href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
+
+        S</a> and <a
+        href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
+        Ten</a> is not guarantied (but may work). Supported Vixen mounts
+      are primarily the SX, <a
+        href="https://www.vixenoptics.co.uk/Pages/sxw_mount.htm">SXW</a>
+      and <a href="https://www.vixenoptics.co.uk/Pages/sxd_mount.htm">SXD</a>,
+      and <a href="https://www.vixenoptics.co.uk/Pages/atlux_mount.htm">Atlux</a>.
+      Other mounts (e.g. GP2, GPD2, SX2, SXD2, SXP, AXD, AXD2) may be
+      partly supported.</p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">This
+
+      way you can fully control, and plan the sky observations from your
+      sofa, while it's freezing outside.<br>
+    </p>
+    <div align="center"><a
+        href="https://www.vixenoptics.co.uk/Pages/star_book.htm"><img
+          alt="Starbook" title="Starbook" src="Starbook.jpg" border="0"
+          height="200" width="156"></a></div>
+    <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
+      16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
+      padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
+      239); color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><a
+        href="https://github.com/farhi/matlab-starbook#usage"
+        aria-hidden="true" class="anchor" id="user-content-usage"
+        style="box-sizing: border-box; background-color: transparent;
+        color: rgb(3, 102, 214); text-decoration: none; float: left;
+        padding-right: 4px; margin-left: -20px; line-height: 1;"><svg
+          aria-hidden="true" class="octicon octicon-link" height="16"
+          version="1.1" viewBox="0 0 16 16" width="16"><path
+            fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3
+            4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2
+            3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98
+            0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12
+            13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64
+            1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9
+            13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage</h2>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">The
+
+      mount should have been aligned and configured (date, location,
+      weighting) before. <br>
+      The StarBook <b>IP</b> should be read accessing the '<i>About
+        STAR BOOK</i>' item, e.g. displayed in the menu at start-up or
+      accessed with the 'MENU' key. <br>
+    </p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">Then
+
+      use e.g.:</p>
+    <div class="highlight highlight-source-matlab" style="box-sizing:
+      border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
+      font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
+      UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
+      Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
+      Symbol&quot;; font-size: 16px; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      font-weight: 400; letter-spacing: normal; orphans: 2; text-align:
+      start; text-indent: 0px; text-transform: none; white-space:
+      normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
+      0px; text-decoration-style: initial; text-decoration-color:
+      initial;">
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; sb = starbook(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>169.254.1.1<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>);</pre>
+    </div>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">to
+
+      establish the connection and display the StarBook screen. When the
+      IP is not given, a dialogue shows up.<br>
+    </p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">The
+
+      buttons are active in a similar way to the physical ones. The
+      mouse wheel allows to zoom in/out, and the display is regularly
+      updated (5 sec). You can access more actions from the top menu.<br>
+    </p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><img
+        alt="static" title="static" src="screen.png" align="right"
+        height="240" width="320">If the StarBook image can not be
+      retrieved (e.g with a StarBook S and StarBook Ten), a static image
+      is used, and buttons are active as RA+/RA-/DEC+/DEC- (arrows on
+      the right) and ZOOM+/ZOOM- (up/down arrows on the left).<br>
+    </p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">You
+      may as well control the <i>StarBook</i> programmatically, using
+      the methods below with the 'sb' object. To close the StarBook
+      image in this case you may use<br>
+    </p>
+    <div class="highlight highlight-source-matlab" style="box-sizing:
+      border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
+      font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
+      UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
+      Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
+      Symbol&quot;; font-size: 16px; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      font-weight: 400; letter-spacing: normal; orphans: 2; text-align:
+      start; text-indent: 0px; text-transform: none; white-space:
+      normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
+      0px; text-decoration-style: initial; text-decoration-color:
+      initial;">
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; close(image(sb))</pre>
+    </div>
+    <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
+      16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
+      padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
+      239); color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><a
+href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
+        aria-hidden="true" class="anchor"
+        id="user-content-requirementsinstallation" style="box-sizing:
+        border-box; background-color: transparent; color: rgb(3, 102,
+        214); text-decoration: none; float: left; padding-right: 4px;
+        margin-left: -20px; line-height: 1;"><svg aria-hidden="true"
+          class="octicon octicon-link" height="16" version="1.1"
+          viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4
+            9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5
+            0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22
+            8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2
+            1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5
+            0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31
+            7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"><br>
+          </path></svg></a></h2>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">
+    </p>
+    <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
+      16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
+      padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
+      239); color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><a
+        href="https://github.com/farhi/matlab-starbook#methods"
+        aria-hidden="true" class="anchor" id="user-content-methods"
+        style="box-sizing: border-box; background-color: transparent;
+        color: rgb(3, 102, 214); text-decoration: none; float: left;
+        padding-right: 4px; margin-left: -20px; line-height: 1;"><svg
+          aria-hidden="true" class="octicon octicon-link" height="16"
+          version="1.1" viewBox="0 0 16 16" width="16"><path
+            fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3
+            4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2
+            3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98
+            0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12
+            13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64
+            1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9
+            13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Methods</h2>
+    <ul style="box-sizing: border-box; padding-left: 2em; margin-top:
+      0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family:
+      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+      Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;,
+      &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;
+      font-size: 16px; font-style: normal; font-variant-ligatures:
+      normal; font-variant-caps: normal; font-weight: 400;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">
+      <li style="box-sizing: border-box;"><strong style="box-sizing:
+          border-box; font-weight: 600;">starbook(ip)</strong>: connect
+        to a StarBook controller</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">gotoradec(sb,
+
+          ra, dec)</strong>: send StarBook to RA/DEC. When the RA/DEC
+        are not given, a dialogue is shown.<br>
+      </li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">move(sb,
+          n,s,e,w)</strong>: move the StarBook in given direction. Use <i>stop</i>
+        to abort.</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">align(sb)</strong>:
+        align current coordinates to RA/DEC target</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">stop(sb)</strong>:
+        stop the mount (e.g. during move/gotoradec)</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">setspeed(sb)</strong>:
+        set the current zoom/mount speed 0:stop - 8:fast</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">image(sb)</strong>:
+        display the StarBook image (only for 320*240 screen)</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">home(sb)</strong>:
+        send the StarBook to its HOME position (west)<br>
+      </li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><b>help(sb):</b>
+        open the Help page<br>
+      </li>
+    </ul>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">Other
+
+      minor commands</p>
+    <ul style="box-sizing: border-box; padding-left: 2em; margin-top:
+      0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family:
+      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+      Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;,
+      &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;
+      font-size: 16px; font-style: normal; font-variant-ligatures:
+      normal; font-variant-caps: normal; font-weight: 400;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">
+      <li style="box-sizing: border-box;"><strong style="box-sizing:
+          border-box; font-weight: 600;">start(sb)</strong>: set/reset
+        the StarBook in SCOPE mode</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">getspeed(sb)</strong>:
+        return the current zoom/mount speed</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">getstatus(sb)</strong>:
+        update the StarBook state</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">getxy(sb)</strong>:
+        update motor coders</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
+          style="box-sizing: border-box; font-weight: 600;">getscreen(sb)</strong>:
+        get the StarBook image as an RGB matrix</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><b>update(sb):</b>
+        update status and image</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><b>plot(sb):</b>
+        same as <i>image(sb)</i></li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><b>web(sb):</b>
+        show the current target on <a href="http://sky-map.org/">sky-map.org</a></li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><b>zoom(sb,{z}):</b>&nbsp;
+
+        get/set the zoom level. z can be 'in','out' or in 0-8</li>
+      <li style="box-sizing: border-box; margin-top: 0.25em;"><b>date(sb):</b>
+        get the StarBook date/time</li>
+    </ul>
+    For all of these methods above, you may get more help with, e.g.:<br>
+    <div class="highlight highlight-source-matlab" style="box-sizing:
+      border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
+      font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
+      UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
+      Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
+      Symbol&quot;; font-size: 16px; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      font-weight: 400; letter-spacing: normal; orphans: 2; text-align:
+      start; text-indent: 0px; text-transform: none; white-space:
+      normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
+      0px; text-decoration-style: initial; text-decoration-color:
+      initial;">
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; help starbook.move</pre>
+    </div>
+    <ul style="box-sizing: border-box; padding-left: 2em; margin-top:
+      0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family:
+      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+      Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;,
+      &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;
+      font-size: 16px; font-style: normal; font-variant-ligatures:
+      normal; font-variant-caps: normal; font-weight: 400;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">
+    </ul>
+    <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
+      16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
+      padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
+      239); color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><a
+href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
+        aria-hidden="true" class="anchor"
+        id="user-content-requirementsinstallation" style="box-sizing:
+        border-box; background-color: transparent; color: rgb(3, 102,
+        214); text-decoration: none; float: left; padding-right: 4px;
+        margin-left: -20px; line-height: 1;"><svg aria-hidden="true"
+          class="octicon octicon-link" height="16" version="1.1"
+          viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4
+            9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5
+            0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22
+            8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2
+            1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5
+            0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31
+            7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Requirements/Installation</h2>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><a
+        href="https://www.mathworks.com/">Matlab</a>, no external
+      toolbox. A Vixen StarBook controller for SX-type mounts.</p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">Just
+
+      copy the files. Then type commands above.</p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><b>Limitations:</b>
+      The <a href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
+
+        S</a> and <a
+        href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
+        Ten</a> may be partly supported (the screen image is not
+      handled).</p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">We
+
+      recommend to install as well:<br>
+    </p>
+    <ul>
+      <li><a href="http://stellarium.org/">Stellarium</a>, for a nice
+        looking view of the sky.</li>
+    </ul>
+    <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
+      16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
+      padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
+      239); color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><a
+        href="https://github.com/farhi/matlab-starbook#credits"
+        aria-hidden="true" class="anchor" id="user-content-credits"
+        style="box-sizing: border-box; background-color: transparent;
+        color: rgb(3, 102, 214); text-decoration: none; float: left;
+        padding-right: 4px; margin-left: -20px; line-height: 1;"><svg
+          aria-hidden="true" class="octicon octicon-link" height="16"
+          version="1.1" viewBox="0 0 16 16" width="16"><path
+            fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3
+            4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2
+            3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98
+            0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12
+            13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64
+            1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9
+            13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Credits</h2>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><strong
+        style="box-sizing: border-box; font-weight: 600;">urldownload :
+        version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016</strong></p>
+    <ul style="box-sizing: border-box; padding-left: 2em; margin-top:
+      0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family:
+      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+      Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;,
+      &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;
+      font-size: 16px; font-style: normal; font-variant-ligatures:
+      normal; font-variant-caps: normal; font-weight: 400;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">
+      <li style="box-sizing: border-box;"><a
+href="https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload"
+          rel="nofollow" style="box-sizing: border-box;
+          background-color: transparent; color: rgb(3, 102, 214);
+          text-decoration: none;">https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload</a></li>
+    </ul>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;"><strong
+        style="box-sizing: border-box; font-weight: 600;">rubytelescopeserver:
+
+        Rob Burrowes 2013</strong></p>
+    <ul style="box-sizing: border-box; padding-left: 2em; margin-top:
+      0px; margin-bottom: 0px !important; color: rgb(36, 41, 46);
+      font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
+      UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
+      Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
+      Symbol&quot;; font-size: 16px; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      font-weight: 400; letter-spacing: normal; orphans: 2; text-align:
+      start; text-indent: 0px; text-transform: none; white-space:
+      normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
+      0px; text-decoration-style: initial; text-decoration-color:
+      initial;">
+      <li style="box-sizing: border-box;"><a
+          href="https://github.com/rbur004/rubytelescopeserver"
+          style="box-sizing: border-box; background-color: transparent;
+          color: rgb(3, 102, 214); text-decoration: none;">https://github.com/rbur004/rubytelescopeserver</a></li>
+    </ul>
+  </body>
+</html>

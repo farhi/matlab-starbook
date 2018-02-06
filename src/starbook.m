@@ -334,8 +334,9 @@ classdef starbook < handle
         set(t,   'UserData', self);
         set(src, 'UserData', t);  % store in Auto Update menu entry
         start(t);
-      else figure(h);
-      end
+      else 
+        set(0,'CurrentFigure',h)
+;      end
       im = '';
       try
         im = getscreen(self);
@@ -492,24 +493,15 @@ function [ra_h, ra_min] = getra(ra)
   % getra: convert any input RA into h and min
   ra_h = []; ra_min = [];
   if ischar(ra)
-    % expect XXhYYmZZs or XXhYYm or XX:YY:ZZ or XX:YY
-    pat = [ '(?<h>\d+)h(?<m>\d+)m(?<s>[0-9\.]+)s|' ...
-            '(?<h>\d+)h(?<m>[0-9\.]+)m|' ...
-            '(?<h>\d+):(?<m>\d+):(?<s>[0-9\.]+)|' ... 
-            '(?<h>\d+):(?<m>[0-9\.]+)|' ...
-            '(?<h>\d+)h(?<m>[0-9\.]+)|' ...
-            '(?<h>[0-9\.]+)' ];
-    ra = regexp(ra, pat, 'tokens');
-    ra = str2double(ra{1});
+    ra = repradec(ra);
   end
   if isnumeric(ra)
     if isscalar(ra)
-      ra_h   = fix(ra);
-      ra_min = (ra - ra_h)*60;
+      ra_h   = fix(ra); ra_min = abs(ra - ra_h)*60;
     elseif numel(ra) == 2
-      ra_h = ra(1); ra_min = ra(2);
+      ra_h = ra(1);     ra_min = abs(ra(2));
     elseif numel(ra) == 3
-      ra_h = ra(1); ra_min = ra(2)+ra(3)/60;
+      ra_h = ra(1);     ra_min = abs(ra(2))+abs(ra(3)/60);
     end
   else
     disp([ mfilename ': invalid RA.' ])
@@ -517,26 +509,27 @@ function [ra_h, ra_min] = getra(ra)
   end
 end % getra
 
+function str = repradec(str)
+  %repradec: replace string stuff and get it into num
+  str = lower(str);
+  for rep = {'d','m','s',':','°','deg'}
+    str = strrep(str, rep, ' ');
+  end
+  str = str2num(str);
+end
+
 function [dec_deg, dec_min] = getdec(dec)
   % getdec: convert any input DEC into deg and min
   if ischar(dec)
-    pat = [ '(?<d>[\-+0-9\.]+)°(?<m>\d+)''(?<s>[0-9\.]+)"|' ...
-            '(?<d>[\-+0-9\.]+)°(?<m>\d+)''(?<s>[0-9\.]+)|' ... 
-            '(?<d>[\-+0-9\.]+)°(?<m>[0-9\.]+)''|' ... 
-            '(?<d>[\-+0-9\.]+)°(?<m>[0-9\.]+)|' ...
-            '(?<d>[\-+0-9\.]+)°|' ...
-            '(?<d>[\-+0-9\.]+)' ];
-    dec = regexp(dec, pat, 'tokens');
-    dec = str2double(dec{1});
+    dec = repradec(dec);
   end
   if isnumeric(dec)
     if isscalar(dec)
-      dec_deg = fix(dec);
-      dec_min = (dec - dec_deg)*60;
+      dec_deg = fix(dec); dec_min = abs(dec - dec_deg)*60;
     elseif numel(dec) == 2
-      dec_deg = dec(1); dec_min = dec(2);
+      dec_deg = dec(1);   dec_min = abs(dec(2));
     elseif numel(dec) == 3
-      dec_deg = dec(1); dec_min = dec(2)+dec(3)/60;
+      dec_deg = dec(1);   dec_min = abs(dec(2))+abs(dec(3)/60);
     end
   else
     disp([ mfilename ': invalid DEC' ])

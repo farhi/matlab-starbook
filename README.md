@@ -1,7 +1,7 @@
 # matlab-starbook
 Control a Vixen SX mount StarBook from Matlab
 
-![Image of StarBook](https://github.com/farhi/matlab-starbook/blob/master/src/Starbook.jpg)
+![Image of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/Starbook.jpg)
 
 Purpose
 -------

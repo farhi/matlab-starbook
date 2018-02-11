@@ -104,7 +104,7 @@ classdef starbook < handle
     
     function s = getstatus(self)
       % s=getstatus(sb): update object with current status
-      %    Can return a string indicating status.
+      %    Return a string indicating status.
       
       % If the mount is executing a gotoradec. GOTO=1
       % States power on  => INIT
@@ -121,10 +121,8 @@ classdef starbook < handle
         self.state = 'GOTO';
       end
       getxy(self);  % update coder values
-      if nargout
-        s = sprintf('RA=%d+%f DEC=%d+%f [%4s]', ...
-          self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state);
-      end
+      s = sprintf('RA=%d+%f DEC=%d+%f [%4s]', ...
+        self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state);
     end % getstatus
 
     function gotoradec(self, ra_h, ra_min, dec_deg, dec_min)
@@ -282,9 +280,7 @@ classdef starbook < handle
       if abs(abs(self.y) - self.round/2) < self.round/2/10
         disp([ mfilename ': mount is close to reverse on YX (north-south=DEC) motor.' ])
       end
-      if nargout
-        s = sprintf('X=%d Y=%d', self.x, self.y);
-      end
+      s = sprintf('X=%d Y=%d', self.x, self.y);
     end % getxy
     
     function W = getscreen(self)
@@ -321,7 +317,16 @@ classdef starbook < handle
           'UserData', ud);
         % add menu entries
         m = uimenu(h, 'Label', 'StarBook');
-        uimenu(m, 'Label', 'Goto RA/DEC...',  'Callback', @MenuCallback, 'Accelerator','g');
+        uimenu(m, 'Label', 'Close',        ...
+          'Callback', 'filemenufcn(gcbf,''FileClose'')','Accelerator','w');
+        uimenu(m, 'Label', 'Save',        ...
+          'Callback', 'filemenufcn(gcbf,''FileSave'')','Accelerator','s');
+        uimenu(m, 'Label', 'Save As...',        ...
+          'Callback', 'filemenufcn(gcbf,''FileSaveAs'')');
+        uimenu(m, 'Label', 'Print',        ...
+          'Callback', 'printdlg(gcbf)');  
+        uimenu(m, 'Label', 'Goto RA/DEC...', 'Separator','on', ...
+          'Callback', @MenuCallback, 'Accelerator','g');
         uimenu(m, 'Label', 'Stop',  'Callback', @MenuCallback, 'Accelerator','s');
         uimenu(m, 'Label', 'Align', 'Callback', @MenuCallback);
         uimenu(m, 'Label', 'Zoom+', 'Callback', @MenuCallback);

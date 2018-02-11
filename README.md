@@ -1,7 +1,7 @@
 # matlab-starbook
 Control a Vixen SX mount StarBook from Matlab
 
-![Image of StarBook](https://github.com/farhi/matlab-starbook/blob/master/src/Starbook.jpg)
+![Image of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/Starbook.jpg)
 
 Purpose
 -------
@@ -34,6 +34,8 @@ The easiest is to display the starbook screen image with
 The buttons are active in a similar way to the physical ones. The mouse
 wheel allows to zoom in/out, and the display is regularly updated (5 sec).
 You can access more actions from the top menu.
+
+![Screen of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/screen_valid.png)
 
 Methods
 -------

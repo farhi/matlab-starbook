@@ -58,8 +58,8 @@ classdef starbook < handle
     ip        = '169.254.1.1';  % default IP as set in StarBook
     target_ra = struct('h',  0,'min',0);       % target RA/DEC, as struct(h/deg,min)
     target_dec= struct('deg',0,'min',0);
-    ra        = struct();       % current RA/DEC, as struct(h/deg,min)
-    dec       = struct();
+    ra        = struct('h',  0,'min',0);       % current RA/DEC, as struct(h/deg,min)
+    dec       = struct('deg',0,'min',0);
     state     = 'INIT';
     x         = 0;        % coder values (0:round)
     y         = 0;
@@ -133,8 +133,20 @@ classdef starbook < handle
           'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
       else
         disp([ 'SIMU: ' 'getstatus' ]);
-        ret={ self.target_ra.h self.target_ra.min, ...
-              self.target_dec.deg self.target_dec.min, 0, 'SIMU' };
+        % we simulate a move from current to target RA/DEC
+        dRA   =  (self.target_ra.h+self.target_ra.min/60) ...
+                -(self.ra.h+self.ra.min/60);
+        dDEC  =  (self.target_dec.deg+self.target_dec.min/60) ...
+               - (self.dec.deg+self.dec.min/60);
+        % max mve is limited
+        if abs(dRA)  > 1, dRA  =   sign(dRA); end
+        if abs(dDEC) > 4, dDEC = 4*sign(dDEC); end
+        % compute next position
+        DEC= self.dec.deg+self.dec.min/60 + dDEC;
+        [RA_h, RA_min]     = getra(self.ra.h+self.ra.min/60 + dRA);
+        [DEC_deg, DEC_min] = getdec(self.dec.deg+self.dec.min/60 + dDEC);
+        
+        ret={ RA_h, RA_min, DEC_deg, DEC_min, 0, 'SIMU' };
       end
       [self.ra.h, self.ra.min, self.dec.deg, self.dec.min, goto] = deal(ret{1:5});
       self.ra.h    = double(self.ra.h);
@@ -420,6 +432,9 @@ classdef starbook < handle
         % get status and display
         hi = image(im);
         set(gca, 'Position', [ 0 0 1 1 ]);
+        set(gcf, 'Name', ...
+          sprintf('StarBook: RA=%d+%.2f DEC=%d+%.2f [%4s]', ...
+          self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state));
         set(hi, 'UserData', ud);
         set(hi, 'ButtonDownFcn',        @ButtonDownCallback);, ...
       end

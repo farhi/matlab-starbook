@@ -18,6 +18,10 @@ classdef starbook < handle
   % You can access more actions from the top menu, and unactivate the 
   % auto-update.
   %
+  % For testing purposes, you may open a simulated StarBook with:
+  %
+  %   sb = starbook('simulate');
+  %
   % Methods:
   %   starbook(ip):   connect to a StarBook controller
   %   gotoradec(sb, ra, dec): send StarBook to RA/DEC  
@@ -52,8 +56,8 @@ classdef starbook < handle
 
   properties
     ip        = '169.254.1.1';  % default IP as set in StarBook
-    target_ra = struct();       % target RA/DEC, as struct(h/deg,min)
-    target_dec= struct();
+    target_ra = struct('h',  0,'min',0);       % target RA/DEC, as struct(h/deg,min)
+    target_dec= struct('deg',0,'min',0);
     ra        = struct();       % current RA/DEC, as struct(h/deg,min)
     dec       = struct();
     state     = 'INIT';
@@ -62,10 +66,11 @@ classdef starbook < handle
     round     = 8640000;  % full circle coder value
     speed     = 8;
     timer     = [];       % the current Timer object which sends a getstate regularly
-    version   = '';
-    place     = {};       % GPS location
-    start_time= {};
+    version   = '2.7 (simulate)';
+    place     = { 'E' 5 2 'N' 45 2 0 };       % GPS location
+    start_time= datestr(now);
     UserData  = [];
+    simulate  = false;
   end % properties
   
   methods
@@ -73,7 +78,11 @@ classdef starbook < handle
     function sb = starbook(ip)
       % sb=starbook(ip): start communication an given IP and initialize the StarBook
       if nargin
-        sb.ip         = ip;
+        if strcmp(ip, 'simulate')
+          sb.simulate   = true
+        else
+          sb.ip         = ip;
+        end
       else
         prompt = {'Enter StarBook IP (e.g. 169.254.1.1)'};
         name = 'StarBook: Set IP';
@@ -84,15 +93,23 @@ classdef starbook < handle
         if isempty(answer), error([ mfilename ': initialization aborted.' ]); else sb.ip = answer{1}; end
       end
       disp([ mfilename ': Connecting to ' sb.ip ])
-      ret = queue(sb.ip, 'getversion', 'version=%s');
-      if ischar(ret) && strfind(ret, 'error')
-        error(ret);
+      if ~sb.simulate
+        ret = queue(sb.ip, 'getversion', 'version=%s');
+        if ischar(ret) && strfind(ret, 'error')
+          error(ret);
+        else
+          sb.version = char(ret);
+        end
       end
-      sb.version    = char(queue(sb.ip, 'getversion', 'version=%s'));
-      sb.place      = queue(sb.ip, 'getplace',   'longitude=%c%d+%d&latitude=%c%d+%d&timezone=%d');
+      
+      if ~sb.simulate
+        sb.place      = queue(sb.ip, 'getplace',   'longitude=%c%d+%d&latitude=%c%d+%d&timezone=%d');
+      end
       sb.start_time = date(sb);
       % round: This is a full circle on the dec and ra motors in y or x coordinates.
-      sb.round      = queue(sb.ip, 'getround',   'ROUND=%d');
+      if ~sb.simulate
+        sb.round      = queue(sb.ip, 'getround',   'ROUND=%d');
+      end
       % make sure we go to SCOPE mode
       getstatus(sb);
       getxy(sb);
@@ -111,8 +128,14 @@ classdef starbook < handle
       %       Scope mode => SCOPE
       %       Chart mode => CHART
       %       In a menu  => USER
-      ret = queue(self.ip, 'getstatus', ...
-        'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
+      if ~self.simulate
+        ret = queue(self.ip, 'getstatus', ...
+          'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
+      else
+        disp([ 'SIMU: ' 'getstatus' ]);
+        ret={ self.target_ra.h self.target_ra.min, ...
+              self.target_dec.deg self.target_dec.min, 0, 'SIMU' };
+      end
       [self.ra.h, self.ra.min, self.dec.deg, self.dec.min, goto] = deal(ret{1:5});
       self.ra.h    = double(self.ra.h);
       self.dec.deg = double(self.dec.deg);
@@ -176,13 +199,22 @@ classdef starbook < handle
         self.target_ra.h,    self.target_ra.min, ...
         self.target_dec.deg, self.target_dec.min);
       disp([ mfilename ': [' datestr(now) '] ' cmd ]);
-      queue(self.ip, cmd, 'OK');
+      if ~self.simulate
+        queue(self.ip, cmd, 'OK');
+      else
+        disp([ 'SIMU: ' cmd ]);
+      end
     end % gotoradec
     
     function home(self)
       % home(sb): send mount to home position
       disp([ mfilename ': [' datestr(now) '] home' ]);
-      queue(self.ip, 'gohome?home=0','OK');
+      cmd = 'gohome?home=0';
+      if ~self.simulate
+        queue(self.ip, cmd,'OK');
+      else
+        disp([ 'SIMU: ' cmd ]);
+      end
     end % home
     
     function move(self, north, south, east, west)
@@ -217,9 +249,12 @@ classdef starbook < handle
       south = logical(south);
       east  = logical(east);
       west  = logical(west);
-      queue(self.ip, ...
-        sprintf('move?north=%i&south=%i&east=%i&west=%i', north, south, east, west), ...
-        'OK');
+      cmd = sprintf('move?north=%i&south=%i&east=%i&west=%i', north, south, east, west);
+      if ~self.simulate
+        queue(self.ip, cmd, 'OK');
+      else
+        disp([ 'SIMU: ' cmd ]);
+      end
     end % move
     
     function setspeed(self, speed)
@@ -230,8 +265,12 @@ classdef starbook < handle
       elseif speed > 8, speed = 8; 
       end
       self.speed = round(speed);
-      queue(self.ip, sprintf('setspeed?speed=%i', self.speed), 'OK');
-      
+      cmd = sprintf('setspeed?speed=%i', self.speed);
+      if ~self.simulate
+        queue(self.ip, cmd, 'OK');
+      else
+        disp([ 'SIMU: ' cmd ]);
+      end
     end % setspeed
     
     function s = getspeed(self)
@@ -242,14 +281,22 @@ classdef starbook < handle
     function stop(self)
       % stop(sb): stop any movement
       %  Can return "ERROR:ILLEGAL STATE".
-      queue(self.ip, 'stop','OK');
+      if ~self.simulate
+        queue(self.ip, 'stop','OK');
+      else
+        disp([ 'SIMU: ' 'stop' ]);
+      end
       move(self, 0,0,0,0);
     end % stop
     
     function start(self)
       % start(sb): clear any error, and set the mount in move mode
       %  Can return "ERROR:ILLEGAL STATE".
-      queue(self.ip, 'start');
+      if ~self.simulate
+        queue(self.ip, 'start');
+      else
+        disp([ 'SIMU: ' 'start' ]);
+      end
     end % start
     
     function align(self)
@@ -257,13 +304,19 @@ classdef starbook < handle
       %   One should usually issue a gotoradec, and move the mount to center
       %   the actual location of the target, then issue an align.
       disp([ mfilename ': [' datestr(now) '] align' ]);
-      queue(self.ip, 'align','OK');
+      if ~self.simulate
+        queue(self.ip, 'align','OK');
+      else
+        disp([ 'SIMU: ' 'align' ]);
+      end
       % display target and current RA/DEC
     end % align
     
     function s=getxy(self)
       % getxy(sb): update mount motors coder values
-      xy     = queue(self.ip, 'getxy', 'X=%d&Y=%d');
+      if ~self.simulate
+        xy     = queue(self.ip, 'getxy', 'X=%d&Y=%d');
+      else xy = { 0 0 }; end
       [self.x,self.y] = deal(xy{:});
       
       % returns x and y coordinates of the mount. 0,0 is the power on position
@@ -295,9 +348,14 @@ classdef starbook < handle
       % We use urldownload: 
       %   https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload
       cmd = [ 'http://' self.ip '/getscreen.bin' ];
-      [status,raw] = urldownload(cmd);
-
-      W = im12toim24(raw);
+      if ~self.simulate
+        [status,raw] = urldownload(cmd);
+        W = im12toim24(raw);
+      else
+        disp([ 'SIMU: ' cmd ]);
+        W = []; 
+      end
+      
     end % getscreen
     
     function h = image(self)
@@ -375,8 +433,13 @@ classdef starbook < handle
     
     function d = date(self)
       % date(sb): get the starbook date/time
-      d = queue(self.ip, 'gettime',    'time=%d+%d+%d+%d+%d+%d');
-      d = datestr(double(cell2mat(d)));
+      if ~self.simulate
+        d = queue(self.ip, 'gettime',    'time=%d+%d+%d+%d+%d+%d');
+        d = datestr(double(cell2mat(d)));
+      else
+        d = datestr(now);
+      end
+      
     end
     
     function h = plot(self)

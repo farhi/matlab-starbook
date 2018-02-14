@@ -61,7 +61,7 @@ Requirements/Installation
 -------------------------
 Matlab, no external toolbox. A Vixen StarBook controller for SX-type mounts.
 
-Just copy the files and go into the src directory. Then type commands aboce.
+Just copy the files and go into the src directory. Then type commands above.
 
 Credits
 -------

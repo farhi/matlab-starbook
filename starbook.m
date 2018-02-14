@@ -71,6 +71,7 @@ classdef starbook < handle
     start_time= datestr(now);
     UserData  = [];
     simulate  = false;
+    figure    = [];
   end % properties
   
   methods
@@ -78,19 +79,22 @@ classdef starbook < handle
     function sb = starbook(ip)
       % sb=starbook(ip): start communication an given IP and initialize the StarBook
       if nargin
-        if strcmp(ip, 'simulate')
-          sb.simulate   = true
+        if strncmp(ip, 'sim',3)
+          sb.simulate   = true;
         else
           sb.ip         = ip;
         end
       else
-        prompt = {'Enter StarBook IP (e.g. 169.254.1.1)'};
+        prompt = {'Enter StarBook IP (e.g. 169.254.1.1) or "simulate"'};
         name = 'StarBook: Set IP';
         options.Resize='on';
         options.WindowStyle='normal';
         options.Interpreter='tex';
         answer=inputdlg(prompt,name, 1, {sb.ip}, options);
-        if isempty(answer), error([ mfilename ': initialization aborted.' ]); else sb.ip = answer{1}; end
+        if isempty(answer), error([ mfilename ': initialization aborted.' ]);
+        elseif strncmp(answer{1}, 'sim',3)
+          sb.simulate   = true;
+        else sb.ip = answer{1}; end
       end
       disp([ mfilename ': Connecting to ' sb.ip ])
       if ~sb.simulate
@@ -390,16 +394,19 @@ classdef starbook < handle
           'CloseRequestFcn','delete(timerfindall); delete(gcf)', ...
           'UserData', ud);
         % add menu entries
-        m = uimenu(h, 'Label', 'StarBook');
-        uimenu(m, 'Label', 'Close',        ...
-          'Callback', 'filemenufcn(gcbf,''FileClose'')','Accelerator','w');
+        m = uimenu(h, 'Label', 'File');
         uimenu(m, 'Label', 'Save',        ...
           'Callback', 'filemenufcn(gcbf,''FileSave'')','Accelerator','s');
         uimenu(m, 'Label', 'Save As...',        ...
           'Callback', 'filemenufcn(gcbf,''FileSaveAs'')');
         uimenu(m, 'Label', 'Print',        ...
-          'Callback', 'printdlg(gcbf)');  
-        uimenu(m, 'Label', 'Goto RA/DEC...', 'Separator','on', ...
+          'Callback', 'printdlg(gcbf)');
+        uimenu(m, 'Label', 'Close',        ...
+          'Callback', 'filemenufcn(gcbf,''FileClose'')', ...
+          'Accelerator','w', 'Separator','on');
+          
+        m = uimenu(h, 'Label', 'StarBook');
+        uimenu(m, 'Label', 'Goto RA/DEC...', ...
           'Callback', @MenuCallback, 'Accelerator','g');
         uimenu(m, 'Label', 'Stop',  'Callback', @MenuCallback, 'Accelerator','s');
         uimenu(m, 'Label', 'Align', 'Callback', @MenuCallback);
@@ -420,8 +427,9 @@ classdef starbook < handle
         set(src, 'UserData', t);  % store in Auto Update menu entry
         start(t);
       else 
-        set(0,'CurrentFigure',h)
-;      end
+        set(0,'CurrentFigure',h);      
+      end
+      self.figure = h;
       im = '';
       try
         im = getscreen(self);
@@ -440,7 +448,7 @@ classdef starbook < handle
           sprintf('StarBook: RA=%d+%.2f DEC=%d+%.2f [%4s]', ...
           self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state));
         set(hi, 'UserData', ud);
-        set(hi, 'ButtonDownFcn',        @ButtonDownCallback);, ...
+        set(hi, 'ButtonDownFcn',        @ButtonDownCallback);
       end
     end % image
     

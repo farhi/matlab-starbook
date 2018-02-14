@@ -195,9 +195,9 @@ classdef starbook < handle
         return
       elseif nargin == 3
         % Declinaison
-        [dec_deg, dec_min] = getdec(ra_min)
+        [dec_deg, dec_min] = getdec(ra_min);
         % Right Ascension
-        [ra_h, ra_min]     = getra(ra_h)
+        [ra_h, ra_min]     = getra(ra_h);
       elseif nargin < 5
         disp([ mfilename ': gotoradec: wrong number of input.' ])
         return
@@ -266,6 +266,10 @@ classdef starbook < handle
         queue(self.ip, cmd, 'OK');
       else
         disp([ 'SIMU: ' cmd ]);
+        [self.target_ra.h self.target_ra.min] = getra( ...
+          self.target_ra.h+self.target_ra.min/60 + east-west);
+        [self.target_dec.deg self.target_dec.min] = getdec( ...
+          self.target_dec.deg+self.target_dec.min/60 + north-south);
       end
     end % move
     

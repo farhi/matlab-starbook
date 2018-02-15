@@ -230,6 +230,7 @@ classdef starbook < handle
         queue(self.ip, cmd,'OK');
       else
         disp([ 'SIMU: ' cmd ]);
+        gotoradec(self, 0, 0);
       end
     end % home
     
@@ -381,65 +382,40 @@ classdef starbook < handle
     function h = image(self)
       % image(sb): show the StarBook screen and allow control using mouse/menu.
       
+      persistent screen_static
+      
       % select figure
       ud.StarBook      = self;
       ud.clicked_button='';
       tag = [ 'StarBook_' strrep(self.ip, '.', '_') ];
       h = findobj('Tag',tag);
       if isempty(h)
-        h = figure('Tag',tag, 'Name', [ 'StarBook: ' self.ip ], ...
-          'MenuBar','none', 'ToolBar','none', ...
-          'WindowButtonUpFcn',    @ButtonUpCallback, ...
-          'WindowScrollWheelFcn', @ScrollWheelCallback, ...
-          'CloseRequestFcn','delete(timerfindall); delete(gcf)', ...
-          'UserData', ud);
-        % add menu entries
-        m = uimenu(h, 'Label', 'File');
-        uimenu(m, 'Label', 'Save',        ...
-          'Callback', 'filemenufcn(gcbf,''FileSave'')','Accelerator','s');
-        uimenu(m, 'Label', 'Save As...',        ...
-          'Callback', 'filemenufcn(gcbf,''FileSaveAs'')');
-        uimenu(m, 'Label', 'Print',        ...
-          'Callback', 'printdlg(gcbf)');
-        uimenu(m, 'Label', 'Close',        ...
-          'Callback', 'filemenufcn(gcbf,''FileClose'')', ...
-          'Accelerator','w', 'Separator','on');
-          
-        m = uimenu(h, 'Label', 'StarBook');
-        uimenu(m, 'Label', 'Goto RA/DEC...', ...
-          'Callback', @MenuCallback, 'Accelerator','g');
-        uimenu(m, 'Label', 'Stop',  'Callback', @MenuCallback, 'Accelerator','s');
-        uimenu(m, 'Label', 'Align', 'Callback', @MenuCallback);
-        uimenu(m, 'Label', 'Zoom+', 'Callback', @MenuCallback);
-        uimenu(m, 'Label', 'Zoom-', 'Callback', @MenuCallback);
-        uimenu(m, 'Label', 'Update view','Callback', @MenuCallback, 'Accelerator','u');
-        src=uimenu(m, 'Label', 'Auto Update View', 'Callback', @MenuCallback, 'Checked','on');
-        uimenu(m, 'Label', 'Sky seen on <Sky-Map.org>', 'Callback', @MenuCallback, ...
-          'Separator','on');
-        uimenu(m, 'Label', 'Location (GPS) on <Google Maps>', 'Callback', @MenuCallback);
-        uimenu(m, 'Label', 'Help', 'Callback', @MenuCallback);
-        uimenu(m, 'Label', 'About StarBook', 'Callback', @MenuCallback, ...
-          'Separator','on');
-        % create the timer for auto update
-        t  = timer('TimerFcn', @TimerCallback, ...
-                'Period', 5.0, 'ExecutionMode', 'fixedDelay');
-        set(t,   'UserData', self);
-        set(src, 'UserData', t);  % store in Auto Update menu entry
-        start(t);
+        h = image_build(tag, self.ip, ud, self);
       else 
         set(0,'CurrentFigure',h);      
       end
       self.figure = h;
       im = '';
-      try
-        im = getscreen(self);
-      end
-      if isempty(im)
+      
+      % get the screen image
+      if ~isempty(screen_static)
+        % the screen can not be obtained (off-line / not StarBook 1)
+        % we use a static screen
+        im = screen_static;
+      else
         try
-          im = imread(fullfile(fileparts(which(mfilename)),'doc','screen.png'));
-          stop(t)
+          im = getscreen(self);
+        end
+        if isempty(im)
+          im  = imread(fullfile(fileparts(which(mfilename)),'doc','screen.png'));
+          src = findobj(gcf, 'Tag', 'StarBook_Auto_update');
+          t   = get(src,'UserData');
+          % stop(t); % no timer when assumed off-line/static
+          % set(src,'Checked', 'off');
+          screen_static = im;
         end
       end
+      % display it
       if ~isempty(im)
         % get status and display
         hi = image(im);
@@ -449,6 +425,18 @@ classdef starbook < handle
           self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state));
         set(hi, 'UserData', ud);
         set(hi, 'ButtonDownFcn',        @ButtonDownCallback);
+        if ~isempty(screen_static)
+          % we display some text on 'blured' areas for static screen
+          % [ 461 44 ] RA / DEC
+          t = text(465, 70, { ...
+            sprintf('%d+%.2f', self.ra.h, self.ra.min), ...
+            sprintf('%d+%.2f',self.dec.deg, self.dec.min) });
+          set(t,'Color', 'w', 'FontSize', 18);
+          t = text(465, 200, { ...
+            sprintf('%d+%.2f', self.target_ra.h, self.target_ra.min), ...
+            sprintf('%d+%.2f',self.target_dec.deg, self.target_dec.min) });
+          set(t,'Color', 'w', 'FontSize', 18);
+        end
       end
     end % image
     
@@ -663,6 +651,53 @@ function ret=open_system_browser(url)
   end
 end % open_system_browser
 
+
+function h = image_build(tag, ip, ud, self)
+  h = figure('Tag',tag, 'Name', [ 'StarBook: ' ip ], ...
+    'MenuBar','none', 'ToolBar','none', ...
+    'WindowButtonUpFcn',    @ButtonUpCallback, ...
+    'WindowScrollWheelFcn', @ScrollWheelCallback, ...
+    'CloseRequestFcn','delete(timerfindall); delete(gcf)', ...
+    'UserData', ud);
+  % add menu entries
+  m = uimenu(h, 'Label', 'File');
+  uimenu(m, 'Label', 'Save',        ...
+    'Callback', 'filemenufcn(gcbf,''FileSave'')','Accelerator','s');
+  uimenu(m, 'Label', 'Save As...',        ...
+    'Callback', 'filemenufcn(gcbf,''FileSaveAs'')');
+  uimenu(m, 'Label', 'Print',        ...
+    'Callback', 'printdlg(gcbf)');
+  uimenu(m, 'Label', 'Close',        ...
+    'Callback', 'filemenufcn(gcbf,''FileClose'')', ...
+    'Accelerator','w', 'Separator','on');
+    
+  m = uimenu(h, 'Label', 'StarBook');
+  uimenu(m, 'Label', 'Goto RA/DEC...', ...
+    'Callback', @MenuCallback, 'Accelerator','g');
+  uimenu(m, 'Label', 'Stop',  'Callback', @MenuCallback, 'Accelerator','s');
+  uimenu(m, 'Label', 'Align', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'Zoom+', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'Zoom-', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'Home position', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'Update view','Callback', @MenuCallback, ...
+    'Accelerator','u');
+  src=uimenu(m, 'Label', 'Auto Update View', ...
+    'Callback', @MenuCallback, 'Checked','on', ...
+    'Tag', 'StarBook_Auto_update');
+  uimenu(m, 'Label', 'Sky seen on <Sky-Map.org>', 'Callback', @MenuCallback, ...
+    'Separator','on');
+  uimenu(m, 'Label', 'Location (GPS) on <Google Maps>', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'Help', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'About StarBook', 'Callback', @MenuCallback, ...
+    'Separator','on');
+  % create the timer for auto update
+  t  = timer('TimerFcn', @TimerCallback, ...
+          'Period', 5.0, 'ExecutionMode', 'fixedDelay');
+  set(t,   'UserData', self);
+  set(src, 'UserData', t);  % store in Auto Update menu entry
+  start(t);
+end % image_build
+
 % ------------------------------------------------------------------------------
 % Callbacks
 % ------------------------------------------------------------------------------
@@ -739,7 +774,9 @@ function ButtonDownCallback(src, evnt)
     sb.stop;
     sb.start;
   case 'menu'
-    % add a new object in the observation list with timing ?
+    % unused
+  case 'home'
+    home(sb);
   case 'dec+'
     sb.move(1,0,0,0);
   case 'dec-'
@@ -749,7 +786,7 @@ function ButtonDownCallback(src, evnt)
   case 'ra-'
     sb.move(0,0,0,1);
   case 'chart'
-    % select object from name and propose to GO there
+    % unused
   case 'update'
     sb.update;
   case 'about'

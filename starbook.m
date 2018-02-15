@@ -22,6 +22,8 @@ classdef starbook < handle
   %
   %   sb = starbook('simulate');
   %
+  % or use 'simulate' as IP in the input dialogue.
+  %
   % Methods:
   %   starbook(ip):   connect to a StarBook controller
   %   gotoradec(sb, ra, dec): send StarBook to RA/DEC  
@@ -136,7 +138,6 @@ classdef starbook < handle
         ret = queue(self.ip, 'getstatus', ...
           'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
       else
-        disp([ 'SIMU: ' 'getstatus' ]);
         % we simulate a move from current to target RA/DEC
         dRA   =  (self.target_ra.h+self.target_ra.min/60) ...
                 -(self.ra.h+self.ra.min/60);
@@ -306,6 +307,8 @@ classdef starbook < handle
         queue(self.ip, 'stop','OK');
       else
         disp([ 'SIMU: ' 'stop' ]);
+        self.target_ra = self.ra;
+        self.target_dec= self.dec;
       end
       move(self, 0,0,0,0);
     end % stop

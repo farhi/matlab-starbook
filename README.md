@@ -41,21 +41,29 @@ Methods
 -------
 
 - **starbook(ip)**:   connect to a StarBook controller
-- **gotoradec(sb, ra, dec)**: send StarBook to RA/DEC  
-- **move(sb, n,s,e,w)**: move the SB in given direction. Use stop to abort.   
-- **align(sb)**:      align current coordinates to RA/DEC target     
+- **gotoradec(sb, ra, dec)**: send StarBook to RA/DEC
+- **move(sb, n,s,e,w)**: move the SB in given direction. Use stop to abort.
+- **align(sb)**:      align current coordinates to RA/DEC target
 - **stop(sb)**:       stop the mount (e.g. during move/gotoradec)
 - **setspeed(sb)**:   set the current zoom/mount speed 0:stop - 8:fast
 - **image(sb)**:      display the StarBook image (only for 320*240 screen)
 - **home(sb)**:       send the SB to its HOME position
+- **help(sb)**:       open the Help page
 
 Other minor commands
 
 - **start(sb)**:      set/reset the StarBook in SCOPE mode
 - **getspeed(sb)**:   return the current zoom/mount speed 
 - **getstatus(sb)**:  update the StarBook state
-- **getxy(sb)**:      update motor coders     
+- **getxy(sb)**:      update motor coders
 - **getscreen(sb)**:  get the StarBook image as an RGB matrix
+- **update(sb)**:     update status and image
+- **plot(sb)**:       same as image(sb)
+- **close(sb)**:      close the screen view
+- **web(sb)**:        show the current target on sky-map.org
+- **zoom(sb,{z})**:   get/set the zoom level. z can be 'in','out' or in 0-8
+- **date(sb)**:       get the starbook date/time
+- **chart(sb)**:      open skychart (when available)
 
 Requirements/Installation
 -------------------------
@@ -72,4 +80,4 @@ Credits
 
 **rubytelescopeserver: Rob Burrowes 2013**
 
-- https://github.com/rbur004/rubytelescopeserver
+- https://github.com/rbur004/rubytelescopeserver*

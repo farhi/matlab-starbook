@@ -43,9 +43,11 @@ classdef starbook < handle
   %   getscreen(sb):  get the StarBook image as an RGB matrix
   %   update(sb):     update status and image
   %   plot(sb):       same as image(sb)
+  %   close(sb):      close the screen view
   %   web(sb):        show the current target on sky-map.org
   %   zoom(sb,{z}):   get/set the zoom level. z can be 'in','out' or in 0-8
   %   date(sb):       get the starbook date/time
+  %   chart(sb):      open skychart (when available)
   %
   % Credits: 
   % urldownload : version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016

@@ -61,14 +61,17 @@
       text-decoration-style: initial; text-decoration-color: initial;">STARBOOK:
 
 
+
       this is a Matlab class to control the Vixen <a
         href="https://www.vixenoptics.co.uk/Pages/star_book.htm">StarBook</a>
       for telescope mounts. Compatibility with the <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
         Ten</a> is not guarantied (but may work). Supported Vixen mounts
@@ -89,6 +92,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">This
+
 
 
       way you can fully control, and plan the sky observations from your
@@ -137,6 +141,7 @@
       text-decoration-style: initial; text-decoration-color: initial;">The
 
 
+
       mount should have been aligned and configured (date, location,
       weighting) before. <br>
       The StarBook <b>IP</b> should be read accessing the '<i>About
@@ -154,6 +159,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">Then
+
 
 
       use e.g.:</p>
@@ -184,6 +190,7 @@
       text-decoration-style: initial; text-decoration-color: initial;">to
 
 
+
       establish the connection and display the StarBook screen. When the
       IP is not given, a dialogue shows up.<br>
     </p>
@@ -200,6 +207,7 @@
       text-decoration-style: initial; text-decoration-color: initial;">The
 
 
+
       buttons are active in a similar way to the physical ones. The
       mouse wheel allows to zoom in/out, and the display is regularly
       updated (5 sec). You can access more actions from the top menu.</p>
@@ -214,8 +222,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">&nbsp;<img
-        alt="screen_valid" title="screen_valid"
-        src="screen_valid.png"
+        alt="screen_valid" title="screen_valid" src="screen_valid.png"
         align="middle" height="473" width="560"> <br>
       <br>
     </p>
@@ -236,8 +243,10 @@
         href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
         Ten</a>), a static image is used, and buttons are active as
@@ -256,6 +265,7 @@
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">You
 
+
       may as well control the <i>StarBook</i> programmatically, using
       the methods below with the 'sb' object. To close the StarBook
       image in this case you may use<br>
@@ -272,7 +282,7 @@
       normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
       0px; text-decoration-style: initial; text-decoration-color:
       initial;">
-      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; close(image(sb))</pre>
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; close(sb)</pre>
     </div>
     <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
       16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
@@ -357,6 +367,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
           style="box-sizing: border-box; font-weight: 600;">gotoradec(sb,
 
 
+
           ra, dec)</strong>: send StarBook to RA/DEC. When the RA/DEC
         are not given, a dialogue is shown.<br>
       </li>
@@ -397,6 +408,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-decoration-style: initial; text-decoration-color: initial;">Other
 
 
+
       minor commands</p>
     <ul style="box-sizing: border-box; padding-left: 2em; margin-top:
       0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family:
@@ -431,6 +443,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>web(sb):</b>
         show the current target on <a href="http://sky-map.org/">sky-map.org</a></li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>zoom(sb,{z}):</b>&nbsp;
+
 
 
         get/set the zoom level. z can be 'in','out' or in 0-8</li>
@@ -516,6 +529,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-decoration-style: initial; text-decoration-color: initial;">Just
 
 
+
       copy the files. Then type commands above.</p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -531,8 +545,10 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       The <a href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
         Ten</a> may be partly supported (the screen image is not
@@ -548,6 +564,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">We
+
 
 
       recommend to install as well:<br>
@@ -624,6 +641,7 @@ href="https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload"
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><strong
         style="box-sizing: border-box; font-weight: 600;">rubytelescopeserver:
+
 
 
         Rob Burrowes 2013</strong></p>

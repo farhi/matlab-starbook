@@ -101,8 +101,15 @@ classdef starbook < handle
       end
       disp([ mfilename ': Connecting to ' sb.ip ])
       if ~sb.simulate
-        ret = queue(sb.ip, 'getversion', 'version=%s');
-        if ischar(ret) && strfind(ret, 'error')
+        try
+          ret = queue(sb.ip, 'getversion', 'version=%s');
+        catch ME
+          disp(getReport(ME));
+          disp([ mfilename ': Switching to simulate mode.' ])
+          sb.simulate   = true;
+          ret           = sb.version;
+        end
+        if ischar(ret) && ~isempty(strfind(ret, 'error'))
           error(ret);
         else
           sb.version = char(ret);
@@ -718,8 +725,9 @@ function h = image_build(tag, ip, ud, self)
     'Accelerator','u');
   src=uimenu(m, 'Label', 'Auto Update View', ...
     'Callback', @MenuCallback, 'Checked','on');
-  uimenu(m, 'Label', 'Open SkyChart', 'Callback', @MenuCallback, ...
+  t = uimenu(m, 'Label', 'Open SkyChart', 'Callback', @MenuCallback, ...
     'Separator','on');
+  if ~exist('skychart'), set(t, 'Enable','off'); end
   uimenu(m, 'Label', 'Open <Sky-Map.org>', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'Open Location (GPS) on <Google Maps>', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'Help', 'Callback', @MenuCallback);
@@ -793,7 +801,7 @@ function ButtonDownCallback(src, evnt)
   end
   
   switch lower(lab)
-  case {'sky','open <sky-map.org>'}
+  case 'open <sky-map.org>'
     sb.getstatus;
     web(sb);
   case 'zoom+'
@@ -806,7 +814,7 @@ function ButtonDownCallback(src, evnt)
     sb.move(0,0,0,0);
     sb.stop;
     sb.start;
-  case 'menu'
+  case {'sky','menu'}
     % unused
   case {'home','home position'}
     home(sb);
@@ -819,6 +827,7 @@ function ButtonDownCallback(src, evnt)
   case 'ra-'
     sb.move(0,0,0,1);
   case {'chart','open skychart'}
+    sb.getstatus;
     chart(sb);
   case 'update'
     sb.update;
@@ -924,7 +933,8 @@ end % ScrollWheelCallback
 function TimerCallback(src, evnt)
   % TimerCallback: update view from timer event
   sb = get(src, 'UserData');
-  sb.update;
+  if isvalid(sb), sb.update; 
+  else delete(src); end
 end % TimerCallback
 
 

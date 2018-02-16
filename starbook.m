@@ -74,6 +74,7 @@ classdef starbook < handle
     UserData  = [];
     simulate  = false;
     figure    = [];
+    skychart  = [];
   end % properties
   
   methods
@@ -121,8 +122,14 @@ classdef starbook < handle
       getxy(sb);
       start(sb);
       setspeed(sb, 6);
+      % create the timer for auto update
+      sb.timer  = timer('TimerFcn', @TimerCallback, ...
+          'Period', 5.0, 'ExecutionMode', 'fixedDelay', 'UserData', sb, ...
+          'Name', mfilename);
+      % display screen
       disp([ mfilename ': [' datestr(now) '] Welcome to StarBook ' sb.version ])
-      image(sb);
+      image(sb); % also start the timer
+      
     end % starbook
     
     function s = getstatus(self)
@@ -391,13 +398,16 @@ classdef starbook < handle
       ud.StarBook      = self;
       ud.clicked_button='';
       tag = [ 'StarBook_' strrep(self.ip, '.', '_') ];
-      h = findobj('Tag',tag);
+      h = findall(0, 'Tag', tag);
       if isempty(h)
         h = image_build(tag, self.ip, ud, self);
-      else 
-        set(0,'CurrentFigure',h);      
+        if strcmp(self.timer.Running, 'off') start(self.timer); end
+      else
+        if numel(h) > 1, delete(h(2:end)); end
+        set(0, 'CurrentFigure',h);
       end
       self.figure = h;
+      set(h, 'HandleVisibility','on', 'NextPlot','add');
       im = '';
       
       % get the screen image
@@ -411,10 +421,6 @@ classdef starbook < handle
         end
         if isempty(im)
           im  = imread(fullfile(fileparts(which(mfilename)),'doc','screen.png'));
-          src = findobj(gcf, 'Tag', 'StarBook_Auto_update');
-          t   = get(src,'UserData');
-          % stop(t); % no timer when assumed off-line/static
-          % set(src,'Checked', 'off');
           screen_static = im;
         end
       end
@@ -423,11 +429,12 @@ classdef starbook < handle
         % get status and display
         hi = image(im);
         set(gca, 'Position', [ 0 0 1 1 ]);
-        set(gcf, 'Name', ...
+        set(self.figure, 'Name', ...
           sprintf('StarBook: RA=%d+%.2f DEC=%d+%.2f [%4s]', ...
           self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state));
         set(hi, 'UserData', ud);
         set(hi, 'ButtonDownFcn',        @ButtonDownCallback);
+        
         if ~isempty(screen_static)
           % we display some text on 'blured' areas for static screen
           % [ 461 44 ] RA / DEC
@@ -441,12 +448,15 @@ classdef starbook < handle
           set(t,'Color', 'w', 'FontSize', 18);
         end
       end
+      set(h, 'HandleVisibility','off', 'NextPlot','new');
     end % image
     
     function update(self)
       % update(sb): update the starbook status and image
       getstatus(self);
-      image(self);
+      if ishandle(self.figure)
+        image(self);
+      else self.figure = []; end
     end % update
     
     function d = date(self)
@@ -506,6 +516,26 @@ classdef starbook < handle
       % help(sb): open the Help page
       url = fullfile('file:///',fileparts(which(mfilename)),'doc','StarBook.html');
       open_system_browser(url);
+    end
+    
+    function chart(self)
+      % chart(sb): open the skychart
+      if isempty(self.skychart) && exist('skychart')
+        self.skychart = skychart;
+        % associate the starbook to the chart (connect it)
+        self.skychart.telescope = self;
+      end
+      if ~isempty(self.skychart)
+        plot(self.skychart);
+      end
+    end
+    
+    function close(self)
+      % close(sb): close the starbook
+      if ~isempty(self.timer) && isvalid(self.timer)
+        stop(self.timer); 
+      end
+      if ishandle(self.figure); delete(self.figure); end
     end
   
   end % methods
@@ -591,8 +621,7 @@ function [ra_h, ra_min] = getra(ra)
   % getra: convert any input RA into h and min
   ra_h = []; ra_min = [];
   if ischar(ra)
-  ra
-    ra = repradec(ra)
+    ra = repradec(ra);
   end
   if isnumeric(ra)
     if isscalar(ra)
@@ -620,7 +649,7 @@ end
 function [dec_deg, dec_min] = getdec(dec)
   % getdec: convert any input DEC into deg and min
   if ischar(dec)
-    dec = repradec(dec)
+    dec = repradec(dec);
   end
   if isnumeric(dec)
     if isscalar(dec)
@@ -660,7 +689,7 @@ function h = image_build(tag, ip, ud, self)
     'MenuBar','none', 'ToolBar','none', ...
     'WindowButtonUpFcn',    @ButtonUpCallback, ...
     'WindowScrollWheelFcn', @ScrollWheelCallback, ...
-    'CloseRequestFcn','delete(timerfindall); delete(gcf)', ...
+    'CloseRequestFcn',@MenuCallback, ...
     'UserData', ud);
   % add menu entries
   m = uimenu(h, 'Label', 'File');
@@ -682,23 +711,20 @@ function h = image_build(tag, ip, ud, self)
   uimenu(m, 'Label', 'Zoom+', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'Zoom-', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'Home position', 'Callback', @MenuCallback);
+  
+    
+  m = uimenu(h, 'Label', 'View');
   uimenu(m, 'Label', 'Update view','Callback', @MenuCallback, ...
     'Accelerator','u');
   src=uimenu(m, 'Label', 'Auto Update View', ...
-    'Callback', @MenuCallback, 'Checked','on', ...
-    'Tag', 'StarBook_Auto_update');
-  uimenu(m, 'Label', 'Sky seen on <Sky-Map.org>', 'Callback', @MenuCallback, ...
+    'Callback', @MenuCallback, 'Checked','on');
+  uimenu(m, 'Label', 'Open SkyChart', 'Callback', @MenuCallback, ...
     'Separator','on');
-  uimenu(m, 'Label', 'Location (GPS) on <Google Maps>', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'Open <Sky-Map.org>', 'Callback', @MenuCallback);
+  uimenu(m, 'Label', 'Open Location (GPS) on <Google Maps>', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'Help', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'About StarBook', 'Callback', @MenuCallback, ...
     'Separator','on');
-  % create the timer for auto update
-  t  = timer('TimerFcn', @TimerCallback, ...
-          'Period', 5.0, 'ExecutionMode', 'fixedDelay');
-  set(t,   'UserData', self);
-  set(src, 'UserData', t);  % store in Auto Update menu entry
-  start(t);
 end % image_build
 
 % ------------------------------------------------------------------------------
@@ -710,6 +736,11 @@ function ButtonDownCallback(src, evnt)
   
   % this Callback can be used as a menu entry
   lab = '';
+  ud = get(src, 'UserData');  % get the StarBook handle
+  if ~isfield(ud, 'StarBook'), return; end
+  
+  sb = ud.StarBook;
+  
   if ischar(evnt)
     lab = evnt;
   else
@@ -731,7 +762,7 @@ function ButtonDownCallback(src, evnt)
     'sky',          [4 399    423 91] };
     
     % where the mouse click is
-    xy = get(gcf, 'CurrentPoint'); 
+    xy = get(sb.figure, 'CurrentPoint'); 
     x = xy(1,1); y = xy(1,2);
     
     % identify the area cliked upon
@@ -753,17 +784,16 @@ function ButtonDownCallback(src, evnt)
   
   ud = get(src, 'UserData');  % get the StarBook handle
   ud.clicked_button = lab;
-  set(src, 'UserData', ud);
-  set(gcf, 'UserData', ud);
-  sb = ud.StarBook;
+  set(src,       'UserData', ud);
+  set(sb.figure, 'UserData', ud);
   % when in GOTO state, any key -> STOP
   if strncmp(sb.state, 'GOT', 3)
     sb.stop;
     return
   end
   
-  switch lower(strtok(lab))
-  case 'sky'
+  switch lower(lab)
+  case {'sky','open <sky-map.org>'}
     sb.getstatus;
     web(sb);
   case 'zoom+'
@@ -778,7 +808,7 @@ function ButtonDownCallback(src, evnt)
     sb.start;
   case 'menu'
     % unused
-  case 'home'
+  case {'home','home position'}
     home(sb);
   case 'dec+'
     sb.move(1,0,0,0);
@@ -788,11 +818,11 @@ function ButtonDownCallback(src, evnt)
     sb.move(0,0,1,0);
   case 'ra-'
     sb.move(0,0,0,1);
-  case 'chart'
-    % unused
+  case {'chart','open skychart'}
+    chart(sb);
   case 'update'
     sb.update;
-  case 'about'
+  case {'about','about starbook'}
     try
       im = imread(fullfile(fileparts(which(mfilename)),'doc','Starbook.jpg'));
     catch
@@ -810,7 +840,7 @@ function ButtonDownCallback(src, evnt)
                 [ 'Motor coders XY=' num2str([sb.x sb.y]) ], ...
                 [ 'http://' sb.ip ], '(c) E. Farhi' }, 'About StarBook');
     end
-  case {'place','location'}
+  case {'place','location','open location (gps) on <google maps>'}
     e = double(sb.place{2})+double(sb.place{3})/60;
     if sb.place{1} == 'W', e=-e; end
     n = double(sb.place{5})+double(sb.place{6})/60;
@@ -819,10 +849,12 @@ function ButtonDownCallback(src, evnt)
     % open in system browser
     disp(url)
     open_system_browser(url);
-  case {'goto','gotoradec','target'}
+  case {'goto','gotoradec','target','goto ra/dec...'}
     sb.gotoradec;
   case {'help'}
     sb.help;
+  case 'close'
+    close(sb);
   end
 end % ButtonDownCallback
 
@@ -848,7 +880,13 @@ function MenuCallback(src, evnt)
   % MenuCallback: execute callback from menu. Basically go to ButtonDownCallback
   %   except for the Auto update which starts/stops a timer
 
-  lab = get(src, 'Label');
+  try
+    lab = get(src, 'Label');
+  catch
+    % is this a Figure ?
+    lab = get(src, 'Name');
+    lab = 'close';
+  end
   switch lower(strtok(lab))
   case 'auto'
     % get the state
@@ -861,13 +899,13 @@ function MenuCallback(src, evnt)
     if strcmp(checked,'off')
       % check and start timer
       set(src, 'Checked','on');
-      start(t);
+      if strcmp(t.Running,'off') start(t); end
     else
       set(src, 'Checked','off');
-      stop(t);
+      if strcmp(t.Running,'on') stop(t); end
     end
   otherwise
-    feval(@ButtonDownCallback, gcf, lab);
+    feval(@ButtonDownCallback, gcbf, lab);
   end
  
 end % MenuCallback

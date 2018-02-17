@@ -166,8 +166,10 @@ classdef starbook < handle
         DEC= self.dec.deg+self.dec.min/60 + dDEC;
         [RA_h, RA_min]     = getra(self.ra.h+self.ra.min/60 + dRA);
         [DEC_deg, DEC_min] = getdec(self.dec.deg+self.dec.min/60 + dDEC);
-        
-        ret={ RA_h, RA_min, DEC_deg, DEC_min, 0, 'SIMU' };
+        if abs(dRA) > .01 || abs(dDEC) > .01
+          goto=1;
+        else goto=0; end
+        ret={ RA_h, RA_min, DEC_deg, DEC_min, goto, 'SCOPE' };
       end
       [self.ra.h, self.ra.min, self.dec.deg, self.dec.min, goto] = deal(ret{1:5});
       self.ra.h    = double(self.ra.h);
@@ -177,7 +179,7 @@ classdef starbook < handle
         self.state = 'GOTO';
       end
       getxy(self);  % update coder values
-      s = sprintf('RA=%d+%f DEC=%d+%f [%4s]', ...
+      s = sprintf('RA=%d+%f DEC=%d+%f [%s]', ...
         self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state);
     end % getstatus
 
@@ -412,7 +414,7 @@ classdef starbook < handle
         h = image_build(tag, self.ip, ud, self);
         if strcmp(self.timer.Running, 'off') start(self.timer); end
       else
-        if numel(h) > 1, delete(h(2:end)); end
+        if numel(h) > 1, delete(h(2:end)); h=h(1); end
         set(0, 'CurrentFigure',h);
       end
       self.figure = h;
@@ -530,9 +532,16 @@ classdef starbook < handle
     function chart(self)
       % chart(sb): open the skychart
       if isempty(self.skychart) && exist('skychart')
-        self.skychart = skychart;
+        % we search for any already opened skychart handle
+        h = findall(0, 'Tag','SkyChart','Type','figure');
+        if numel(h) > 1, h=h(1); end
+        if ~isempty(h)
+          sc = get(h, 'UserData');
+        else sc = skychart;
+        end
+        self.skychart = sc;
         % associate the starbook to the chart (connect it)
-        self.skychart.telescope = self;
+        connect(self.skychart, self);
       end
       if ~isempty(self.skychart)
         plot(self.skychart);
@@ -545,6 +554,7 @@ classdef starbook < handle
         stop(self.timer); 
       end
       if ishandle(self.figure); delete(self.figure); end
+      self.figure = [];
     end
   
   end % methods
@@ -839,17 +849,16 @@ function ButtonDownCallback(src, evnt)
     catch
       im = '';
     end
-    if ~isempty(im)
-      msgbox({ [ 'StarBook ' sb.version ], ...
+    msg = { [ 'StarBook ' sb.version ], ...
+              'A Matlab interface to control a Vixen StarBook SX mount', ...
               getstatus(sb), ...
               [ 'Motor coders XY=' num2str([sb.x sb.y]) ], ...
-              [ 'http://' sb.ip ], '(c) E. Farhi' }, 'About StarBook', ...
-              'custom', im);
+              [ 'http://' sb.ip ], ...
+              '(c) E. Farhi GPL2 2018 <https://github.com/farhi/matlab-starbook>' };
+    if ~isempty(im)
+      msgbox(msg,  'About StarBook', 'custom', im);
     else
-      helpdlg({ [ 'StarBook ' sb.version ], ...
-                getstatus(sb), ...
-                [ 'Motor coders XY=' num2str([sb.x sb.y]) ], ...
-                [ 'http://' sb.ip ], '(c) E. Farhi' }, 'About StarBook');
+      helpdlg(msg, 'About StarBook');
     end
   case {'place','location','open location (gps) on <google maps>'}
     e = double(sb.place{2})+double(sb.place{3})/60;

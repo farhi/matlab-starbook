@@ -69,11 +69,15 @@ classdef starbook < handle
     y         = 0;
     round     = 8640000;  % full circle coder value
     speed     = 8;
-    timer     = [];       % the current Timer object which sends a getstate regularly
     version   = '2.7 (simulate)';
-    place     = { 'E' 5 2 'N' 45 2 0 };       % GPS location
-    start_time= datestr(now);
+    place     = { 'E' 5 2 'N' 45 2 0 };       % GPS location and hour shift/UTC
     UserData  = [];
+    
+  end % properties
+  
+  properties(Access=private)
+    timer     = [];       % the current Timer object which sends a getstate regularly
+    start_time= datestr(now);
     simulate  = false;
     figure    = [];
     skychart  = [];

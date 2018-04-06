@@ -26,7 +26,8 @@ classdef starbook < handle
   %
   % Methods:
   %   starbook(ip):   connect to a StarBook controller
-  %   gotoradec(sb, ra, dec): send StarBook to RA/DEC  
+  %   gotoradec(sb, ra, dec): send StarBook to RA/DEC  (given in HH:MM and Deg:MM)
+  %   gotoradec(sb, 'M 51'):  send to named object
   %   move(sb, n,s,e,w): move the SB in given direction. Use stop to abort.   
   %   align(sb):      align current coordinates to RA/DEC target     
   %   stop(sb):       stop the mount (e.g. during move/gotoradec)
@@ -77,6 +78,7 @@ classdef starbook < handle
     simulate  = false;
     figure    = [];
     skychart  = [];
+    catalogs  = [];
   end % properties
   
   methods
@@ -121,6 +123,9 @@ classdef starbook < handle
       if ~sb.simulate
         sb.place      = queue(sb.ip, 'getplace',   'longitude=%c%d+%d&latitude=%c%d+%d&timezone=%d');
       end
+      % load catalogs (to be able to give target as name)
+      load(sb);
+      
       sb.start_time = date(sb);
       % round: This is a full circle on the dec and ra motors in y or x coordinates.
       if ~sb.simulate
@@ -140,6 +145,25 @@ classdef starbook < handle
       image(sb); % also start the timer
       
     end % starbook
+    
+    function load(self)
+      % load: load catalogs for objects, stars
+      disp([ mfilename ': Welcome ! Loading Catalogs:' ]);
+      self.catalogs = load(mfilename);
+      
+      % display available catalogs
+      for f=fieldnames(self.catalogs)'
+        name = f{1};
+        if ~isempty(self.catalogs.(name))
+          num  = numel(self.catalogs.(name).RA);
+          if isfield(self.catalogs.(name), 'Description')
+            desc = self.catalogs.(name).Description;
+          else desc = ''; end
+          disp([ mfilename ': ' name ' with ' num2str(num) ' entries.' ]);
+          disp([ '  ' desc ])
+        end
+      end
+    end % load
     
     function s = getstatus(self)
       % s=getstatus(sb): update object with current status
@@ -216,6 +240,11 @@ classdef starbook < handle
         if isempty(answer), return; end
         gotoradec(self, answer{1}, answer{2});
         return
+      elseif nargin == 2 && ischar(ra_h)
+        found = findobj(self, ra_h);
+        [dec_deg, dec_min] = getdec(found.DEC);
+        % Right Ascension
+        [ra_h, ra_min]     = getra(found.RA/15);
       elseif nargin == 3
         % Declinaison
         [dec_deg, dec_min] = getdec(ra_min);
@@ -555,6 +584,40 @@ classdef starbook < handle
       end
       if ishandle(self.figure); delete(self.figure); end
       self.figure = [];
+    end
+    
+    function found = findobj(self, name)
+      % findobj(sc, name): find a given object in catalogs. Select it.
+      catalogs = fieldnames(self.catalogs);
+      found = [];
+      for f=catalogs(:)'
+        catalog = self.catalogs.(f{1});
+        if ~isfield(catalog, 'MAG'), continue; end
+        % search for name
+        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ ';' name ';' ])));
+        if isempty(index)
+        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ name ';' ])));
+        end
+        if isempty(index)
+        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ ';' name ])));
+        end
+        if isempty(index)
+        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ name ])));
+        end
+        if ~isempty(index)
+          found.index   = index(1);
+          found.catalog = f{1};
+          found.RA      = catalog.RA(found.index);
+          found.DEC     = catalog.DEC(found.index);
+          found.MAG     = catalog.MAG(found.index);
+          found.TYPE    = catalog.TYPE{found.index};
+          found.NAME    = catalog.NAME{found.index};
+          break;
+        end
+      end
+      if ~isempty(found)
+        disp([ mfilename ': Selecting object ' name ' as: ' found.NAME ])
+      end
     end
   
   end % methods

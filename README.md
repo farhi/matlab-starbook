@@ -41,7 +41,8 @@ Methods
 -------
 
 - **starbook(ip)**:   connect to a StarBook controller
-- **gotoradec(sb, ra, dec)**: send StarBook to RA/DEC
+- **gotoradec(sb, ra, dec)**: send StarBook to RA/DEC (given in HH:MM and Deg:MM). When the RA/DEC are not given, a dialogue is shown.
+- **gotoradec(sb, 'M 51')**: send StarBook to a named object.
 - **move(sb, n,s,e,w)**: move the SB in given direction. Use stop to abort.
 - **align(sb)**:      align current coordinates to RA/DEC target
 - **stop(sb)**:       stop the mount (e.g. during move/gotoradec)

@@ -35,7 +35,7 @@ You can access more actions from the top menu.
 
 ![Screen of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/screen_valid.png)
 
-You may close this view, and re-open it anytime, without affecting the StarBook itself. 
+You may close this view, and re-open it anytime, without affecting the StarBook itself. If the StarBook image can not be retrieved (e.g with a StarBook S and StarBook Ten), a static image is used, and buttons are active as RA+/RA-/DEC+/DEC- (arrows on the right) and ZOOM+/ZOOM- (up/down arrows on the left).
 
 Progamming the StarBook
 -----------------------

@@ -12,6 +12,10 @@ classdef starbook < handle
   %   sb = starbook('169.254.1.1');
   %
   % to establish the connection and display the StarBook screen.
+  % You may close this view without affecting the StarBook itself, and re-open it
+  % anytime with:
+  %
+  %   sb.image; 
   %
   % The buttons are active in a similar way to the physical ones. The mouse
   % wheel allows to zoom in/out, and the display is regularly updated (5 sec).
@@ -20,9 +24,33 @@ classdef starbook < handle
   %
   % For testing purposes, you may open a simulated StarBook with:
   %
-  %   sb = starbook('simulate');
+  %   sb = starbook('sim');
   %
-  % or use 'simulate' as IP in the input dialogue.
+  % or use 'sim' as IP in the input dialogue.
+  %  You may directly point to a named object or coordinates with:
+  %
+  %  >> sb.gotoradec('M 51');
+  %  >> sb.gotoradec('13h29m52.30s','+47d11m40.0s');
+  %
+  %  To check if the mount has reached its position, use:
+  %
+  %  >> sb.getstatus
+  %
+  %  returns a string with current physical coordinates, as well as the status such as:
+  %
+  %  - GOTO: indicates that the mount is moving
+  %  - SCOPE: indicates that the mount is idle
+  %  - USER: waiting for physical User input
+  %  - INIT: not ready yet
+  %  - CHART: in Chart mode
+  %
+  % You may as well request to wait for the mount to end movement with:
+  % 
+  %  >> waitfor(sb)
+  %
+  % WARNING: if the mount has to reverse, you may loose the computer remote control, 
+  % and would then need to select physically the Yes/No buttons on the StarBook.
+  % The mount status should then be USER.
   %
   % Methods:
   %   starbook(ip):   connect to a StarBook controller
@@ -49,6 +77,7 @@ classdef starbook < handle
   %   zoom(sb,{z}):   get/set the zoom level. z can be 'in','out' or in 0-8
   %   date(sb):       get the starbook date/time
   %   chart(sb):      open skychart (when available)
+  %   findobj(sb,obj) search for an object name in star/DSO catalogs
   %
   % Credits: 
   % urldownload : version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016
@@ -187,7 +216,7 @@ classdef starbook < handle
                 -(self.ra.h+self.ra.min/60);
         dDEC  =  (self.target_dec.deg+self.target_dec.min/60) ...
                - (self.dec.deg+self.dec.min/60);
-        % max mve is limited
+        % max move is limited
         if abs(dRA)  > 1, dRA  =   sign(dRA); end
         if abs(dDEC) > 4, dDEC = 4*sign(dDEC); end
         % compute next position
@@ -202,6 +231,8 @@ classdef starbook < handle
       [self.ra.h, self.ra.min, self.dec.deg, self.dec.min, goto] = deal(ret{1:5});
       self.ra.h    = double(self.ra.h);
       self.dec.deg = double(self.dec.deg);
+      self.ra.min    = double(self.ra.min);
+      self.dec.min = double(self.dec.min);
       self.state   = char(ret{6});
       if goto
         self.state = 'GOTO';
@@ -219,11 +250,13 @@ classdef starbook < handle
       %   a single number
       %   a vector [H,M] or [H,M,S]
       %   a string such as HHhMMmSSs, HH:MM:SS, HHhMM, HH:MM
+      %   an object name (such as M 51)
       % Declinaison can be given as:
       %   separate DEG, M arguments
       %   a single number
       %   a vector [DEG,M] or [DEG,M,S]
       %   a string such as DEG°MM'SS", DEG°MM'
+      %   not specified when giving a named object
       %
       % When RA and DEC are not given, a dialogue box is shown.
       %                
@@ -231,9 +264,14 @@ classdef starbook < handle
       %     ERROR:FORMAT	
       %     ERROR:ILLEGAL STATE	
       %     ERROR:BELOW HORIZON
+      NL = sprintf('\n');
       if nargin == 1
-        prompt = {'Enter Right Ascension RA (HHhMMmSSs or HH:MM:SS or HH.hh)', ...
-               'Enter Declinaison DEC (DD°MM''SS" or DD°MM or DD.dd)' };
+        prompt = {[ '{\bf \color{blue}Enter Right Ascension RA} ' NL ...
+          '(HHhMMmSSs or HH:MM:SS or HH.hh) ' NL ...
+          'or {\color{blue}name} such as {\color{red}M 51}' ], ...
+               ['{\bf \color{blue}Enter Declinaison DEC} ' NL ...
+               '(DD°MM''SS" or DD°MM or DD.dd ' NL ...
+               'or leave {\color{red}empty} when entering name above)' ] };
         name = 'StarBook: Goto RA/DEC: Set TARGET';
         options.Resize='on';
         options.WindowStyle='normal';
@@ -242,10 +280,18 @@ classdef starbook < handle
           {sprintf('%dh%fm',   self.ra.h, self.ra.min), ...
            sprintf('%ddeg%fm', self.dec.deg, self.dec.min)}, options);
         if isempty(answer), return; end
-        gotoradec(self, answer{1}, answer{2});
+        if isempty(answer{2})
+          gotoradec(self, answer{1});
+        else
+          gotoradec(self, answer{1}, answer{2});
+        end
         return
       elseif nargin == 2 && ischar(ra_h)
         found = findobj(self, ra_h);
+        if isempty(found)
+          disp([ mfilename ': gotoradec: can not find object ' ra_h ])
+          return; 
+        end
         [dec_deg, dec_min] = getdec(found.DEC);
         % Right Ascension
         [ra_h, ra_min]     = getra(found.RA/15);
@@ -620,9 +666,19 @@ classdef starbook < handle
         end
       end
       if ~isempty(found)
-        disp([ mfilename ': Selecting object ' name ' as: ' found.NAME ])
+        disp([ mfilename ': Found object ' name ' as: ' found.NAME ])
       end
-    end
+    end % findobj
+    
+    function waitfor(self)
+      % waitfor: waits for the mount to be idle (not moving)
+      
+      flag = true;
+      while flag
+        flag = strfind(self.getstatus, 'GOTO');
+        pause(2)
+      end
+    end % waitfor
   
   end % methods
   
@@ -739,7 +795,7 @@ function [dec_deg, dec_min] = getdec(dec)
   end
   if isnumeric(dec)
     if isscalar(dec)
-      dec_deg = fix(dec); dec_min = abs(dec - dec_deg)*60;
+      dec_deg = floor(dec); dec_min = abs(dec - dec_deg)*60;
     elseif numel(dec) == 2
       dec_deg = dec(1);   dec_min = abs(dec(2));
     elseif numel(dec) == 3

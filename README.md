@@ -24,7 +24,7 @@ Then use e.g.:
 ```
 
 to establish the connection. Use 'sim' as IP to connect to a simulated StarBook.
-The easiest is to display the starbook screen image with
+The easiest is to (re)display the starbook screen image with
 
 ```matlab
 >> sb.image
@@ -36,6 +36,17 @@ You can access more actions from the top menu.
 ![Screen of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/screen_valid.png)
 
 You may close this view, and re-open it anytime, without affecting the StarBook itself. 
+
+Progamming the StarBook
+-----------------------
+
+You may as well control the StarBook programmatically, using the methods below with the 'sb' object. To close the StarBook image in this case you may use:
+
+```matlab
+>> close(sb)
+>> image(sb)  % re-open it
+```
+
 You may directly point to a named object or coordinates with:
 
 ```matlab

@@ -74,6 +74,22 @@ You may as well request to wait for the mount to end movement with:
 >> waitfor(sb)
 ```
 
+A typical programming for a night could be, after the mount alignment:
+```matlab
+diary on % to record the night session
+disp([ datestr(now) ': Starting' ])
+sb=starbook('192.168.1.19');
+for target={'M 51','M81','M101'}
+  disp([ datestr(now) ': Pointing towards ' target{1} ])
+  sb.gotoradec(target{1});
+  waitfor(sb);
+  imwrite(sb.getscreen, [ 'starbook_' target{1} '_' datestr(now, 30) '.png' ])
+  pause(3600)
+end
+home(sb)
+
+```
+
 **WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status should then be USER.
 
 Methods

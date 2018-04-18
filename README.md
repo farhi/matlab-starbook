@@ -16,11 +16,12 @@ This way you can fully control, and plan the sky observations from your sofa, wh
 Usage
 -----
 
-The mount should have been aligned and configured (date, location, equilibration) before, and the StarBook IP should be read accessing the 'About STAR BOOK' menu item. For the alignment, it is recommended to use at least 4 stars, possibly up to 9.
+The mount should have been aligned and configured (date, location, weighting) before. For the alignment, it is recommended to use at least 4 stars, possibly up to 9. For the polar alignment, use Stellarium to visually check the location of the polar star wrt the North pole. Suppose in the view you see the polar star at 10 o'clock. Then turn the graticule so that the space for the polar star is at the opposite location as that of Stellarium (the polar scopes invert images). This would then be the 4 o'clock location for our example. Finally adjust the knobs to place the polar star at its theoretical location.
 
 Then use e.g.:
 
 ```matlab
+>> addpath('/path/to/matlab-starbook')
 >> sb = starbook('169.254.1.1');
 ```
 
@@ -92,7 +93,7 @@ end
 disp([ datestr(now) ': Ending' ])
 home(sb); % back to safe position, to avoid dew on the mirror
 ```
-Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you plan your observations using Stellarium (http://stellarium.org/).
+Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you to plan your observations using Stellarium (http://stellarium.org/).
 
 **WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a 'Telescope will now reverse' message. To avoid this, make sure you choose targets which do not pass the meridian (i.e. remain either on the East or West side). 
 

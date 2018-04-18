@@ -65,6 +65,7 @@
 
 
 
+
       this is a Matlab class to control the Vixen <a
         href="https://www.vixenoptics.co.uk/Pages/star_book.htm">StarBook</a>
       for telescope mounts. Compatibility with the <a
@@ -75,8 +76,10 @@
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -107,13 +110,14 @@
 
 
 
+
       way you can fully control, and plan the sky observations from your
       sofa, while it's freezing outside.<br>
     </p>
     <div align="center"><a
         href="https://www.vixenoptics.co.uk/Pages/star_book.htm"><img
-          alt="Starbook" title="Starbook" src="Starbook.jpg" border="0"
-          width="156" height="200"></a></div>
+          alt="Starbook" title="Starbook" src="Starbook.jpg"
+          height="200" width="156" border="0"></a></div>
     <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
       16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
       padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
@@ -157,8 +161,29 @@
 
 
 
+
       mount should have been aligned and configured (date, location,
-      weighting) before. <br>
+      weighting) before. For the alignment, it is recommended to use at
+      least 4 stars, possibly up to 9. For the polar alignment, use
+      Stellarium to visually check the location of the polar star wrt
+      the North pole. Suppose in the view you see the polar star at 10
+      o'clock. Then turn the graticule so that the space for the polar
+      star is at the opposite location as that of Stellarium (the polar
+      scopes invert images). This would then be the 4 o'clock location
+      for our example. Finally adjust the knobs to place the polar star
+      at its theoretical location.<br>
+    </p>
+    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
+      16px; color: rgb(36, 41, 46); font-family: -apple-system,
+      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
+      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
+      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
+      font-style: normal; font-variant-ligatures: normal;
+      font-variant-caps: normal; font-weight: 400; letter-spacing:
+      normal; orphans: 2; text-align: start; text-indent: 0px;
+      text-transform: none; white-space: normal; widows: 2;
+      word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      text-decoration-style: initial; text-decoration-color: initial;">
       The StarBook <b>IP</b> should be read accessing the '<i>About
         STAR BOOK</i>' item, e.g. displayed in the menu at start-up or
       accessed with the 'MENU' key. <br>
@@ -180,6 +205,7 @@
 
 
 
+
       use e.g.:</p>
     <div class="highlight highlight-source-matlab" style="box-sizing:
       border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
@@ -193,7 +219,7 @@
       normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
       0px; text-decoration-style: initial; text-decoration-color:
       initial;">
-      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; sb = starbook(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>169.254.1.1<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>);</pre>
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; addpath('/path/to/matlab-starbook')<br>&gt;&gt; sb = starbook(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>169.254.1.1<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>);</pre>
     </div>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -212,50 +238,11 @@
 
 
 
+
       establish the connection and display the StarBook screen. When the
       IP is not given, a dialogue shows up.
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-      Use <i>'sim'</i> as IP to connect to a simulated StarBook. The
-      easiest is to display the StarBook screen image with:<br>
-    </p>
-    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
-      16px; color: rgb(36, 41, 46); font-family: -apple-system,
-      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
-      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
-      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
-      font-style: normal; font-variant-ligatures: normal;
-      font-variant-caps: normal; font-weight: 400; letter-spacing:
-      normal; orphans: 2; text-align: start; text-indent: 0px;
-      text-transform: none; white-space: normal; widows: 2;
-      word-spacing: 0px; -webkit-text-stroke-width: 0px;
-      text-decoration-style: initial; text-decoration-color: initial;">
-      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    </p>
-    <div class="highlight highlight-source-matlab" style="box-sizing:
-      border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
-      font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
-      UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
-      Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
-      Symbol&quot;; font-size: 16px; font-style: normal;
-      font-variant-ligatures: normal; font-variant-caps: normal;
-      font-weight: 400; letter-spacing: normal; orphans: 2; text-align:
-      start; text-indent: 0px; text-transform: none; white-space:
-      normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
-      0px; text-decoration-style: initial; text-decoration-color:
-      initial;">
-      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; sb.image</pre>
-    </div>
-    <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
-      16px; color: rgb(36, 41, 46); font-family: -apple-system,
-      BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
-      sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI
-      Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size: 16px;
-      font-style: normal; font-variant-ligatures: normal;
-      font-variant-caps: normal; font-weight: 400; letter-spacing:
-      normal; orphans: 2; text-align: start; text-indent: 0px;
-      text-transform: none; white-space: normal; widows: 2;
-      word-spacing: 0px; -webkit-text-stroke-width: 0px;
-      text-decoration-style: initial; text-decoration-color: initial;">
+      Use <i>'sim'</i> as IP to connect to a simulated StarBook. <br>
     </p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -274,9 +261,10 @@
 
 
 
+
       buttons are active in a similar way to the physical ones. The
       mouse wheel allows to zoom in/out, and the display is regularly
-      updated (5 sec). You can access more actions from the top menu.</p>
+      updated (5 sec). You can access more actions from the top menus.</p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
       BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
@@ -289,7 +277,7 @@
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">&nbsp;<img
         alt="screen_valid" title="screen_valid" src="screen_valid.png"
-        align="middle" width="560" height="473"> <br>
+        height="473" align="middle" width="560"> <br>
       <br>
     </p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
@@ -303,8 +291,8 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><img
-        alt="static" title="static" src="screen.png" align="right"
-        width="133" height="100">If the StarBook image can not be
+        alt="static" title="static" src="screen.png" height="100"
+        align="right" width="133">If the StarBook image can not be
       retrieved (e.g with a <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
 
@@ -313,8 +301,10 @@
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -350,6 +340,7 @@
       text-indent: 0px; text-transform: none; white-space: normal;
       widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">Progamming
+
       the StarBook</h2>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -366,7 +357,7 @@
       using the methods below with the 'sb' object. To close the
       StarBook image in this case you may use:<br>
     </p>
-    <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; close(sb)<br>&gt;&gt; image(sb)  <span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115, 125);"><span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115, 125);">%</span> re-open it</span></pre>
+    <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;"><meta http-equiv="content-type" content="text/html; charset=UTF-8">&gt;&gt; sb=starbook;<br>&gt;&gt; close(sb)<br>&gt;&gt; image(sb)  <span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115, 125);"><span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115, 125);">%</span> re-open it</span></pre>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
       BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial,
@@ -378,6 +369,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">You
+
       may directly point to a named object or coordinates with:
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <br class="Apple-interchange-newline">
@@ -394,9 +386,17 @@
       normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
       0px; text-decoration-style: initial; text-decoration-color:
       initial;">
-      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; sb.gotoradec(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>M 51<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>);
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;"><meta http-equiv="content-type" content="text/html; charset=UTF-8">&gt;&gt; sb=starbook;<br>&gt;&gt; sb.gotoradec(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>M 51<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>);
 &gt;&gt; sb.gotoradec(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>13h29m52.30s<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>,<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>+47d11m40.0s<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>);</pre>
     </div>
+    The named objects have the syntax 'Catalog ID', where the <b>space</b>
+    in between is <b>mandatory.</b> So, use 'M 51', <i>not</i> 'M51'.
+    The available catalogues are those given with <a
+      href="https://github.com/farhi/matlab-skychart">SkyChart</a> (<a
+      href="https://github.com/farhi/matlab-skychart">https://github.com/farhi/matlab-skychart</a>),
+    but SkyChart is not required as the catalogues are now included in
+    StarBook.<br>
+    <br>
     To check if the mount has reached its position, use:<br>
     <br class="Apple-interchange-newline">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -412,16 +412,16 @@
       normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
       0px; text-decoration-style: initial; text-decoration-color:
       initial;">
-      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; sb.getstatus</pre>
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;"><meta http-equiv="content-type" content="text/html; charset=UTF-8">&gt;&gt; sb=starbook;<br>&gt;&gt; sb.getstatus</pre>
     </div>
     returns a string with current physical coordinates, as well as the
     status such as:<br>
     <ul>
-      <li>GOTO: indicates that the mount is moving</li>
-      <li>SCOPE: indicates that the mount is idle</li>
-      <li>USER: waiting for physical User input</li>
-      <li>INIT: not ready yet</li>
-      <li>CHART: in Chart mode</li>
+      <li><b>GOTO:</b> indicates that the mount is moving</li>
+      <li><b>SCOPE:</b> indicates that the mount is idle</li>
+      <li><b>USER:</b> waiting for physical User input</li>
+      <li><b>INIT:</b> not ready yet</li>
+      <li><b>CHART:</b> in Chart mode</li>
     </ul>
     You may as well request to wait for the mount to end movement with:<br>
     <br class="Apple-interchange-newline">
@@ -439,11 +439,12 @@
       initial;">
       <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;">&gt;&gt; waitfor(sb)</pre>
     </div>
-    <font color="#ff0000"><b>WARNING</b></font> if the mount has to
-    reverse, you may loose the computer remote control, and would then
-    need to select physically the Yes/No buttons on the StarBook. The
-    mount status should then be USER.<span style="color: rgb(36, 41,
-      46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
+    A typical programming for a night could be, after the mount
+    alignment:<br>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <div class="highlight highlight-source-matlab" style="box-sizing:
+      border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
+      font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
       UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
       Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
       Symbol&quot;; font-size: 16px; font-style: normal;
@@ -451,7 +452,50 @@
       font-weight: 400; letter-spacing: normal; orphans: 2; text-align:
       start; text-indent: 0px; text-transform: none; white-space:
       normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
-      0px; background-color: rgb(255, 255, 255); text-decoration-style:
+      0px; text-decoration-style: initial; text-decoration-color:
+      initial;">
+      <pre style="box-sizing: border-box; font-family: SFMono-Regular, Consolas, &quot;Liberation Mono&quot;, Menlo, Courier, monospace; font-size: 13.6px; margin-top: 0px; margin-bottom: 0px; word-wrap: normal; padding: 16px; overflow: auto; line-height: 1.45; background-color: rgb(246, 248, 250); border-radius: 3px; word-break: normal;"><br class="Apple-interchange-newline">addpath(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>/path/to/matlab-starbook<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>)
+<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-smi" style="box-sizing: border-box; color: rgb(36, 41, 46);">diary</span> on </span><span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115, 125);">% to record the night session</span>
+disp([ datestr(now) <span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>: Starting<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span> ])
+sb=starbook(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>192.168.1.19<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>);
+<span class="pl-k" style="box-sizing: border-box; color: rgb(215, 58, 73);">for</span> target={<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>M 51<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>,<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>M 81<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>,<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>M 101<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span>}
+  disp([ datestr(now) <span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>: Pointing towards <span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span> target{<span class="pl-c1" style="box-sizing: border-box; color: rgb(0, 92, 197);">1</span>} ])
+  sb.gotoradec(target{<span class="pl-c1" style="box-sizing: border-box; color: rgb(0, 92, 197);">1</span>});
+  waitfor(sb);
+  disp([ datestr(now) <span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span> <span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span> sb.getstatus ])
+  imwrite(sb.getscreen, [ <span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>starbook_<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span> datestr(now, <span class="pl-c1" style="box-sizing: border-box; color: rgb(0, 92, 197);">30</span>) <span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>.png<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span> ])
+  pause(<span class="pl-c1" style="box-sizing: border-box; color: rgb(0, 92, 197);">3600</span>)
+<span class="pl-k" style="box-sizing: border-box; color: rgb(215, 58, 73);">end</span>
+disp([ datestr(now) <span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 98);"><span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span>: Ending<span class="pl-pds" style="box-sizing: border-box; color: rgb(3, 47, 98);">'</span></span> ])
+home(sb); <span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115, 125);"><span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115, 125);">%</span> back to safe position, to avoid dew on the mirror</span></pre>
+    </div>
+    Then simply record images regularly with your CCD/camera. Some will
+    be blurred when the mount moves, but this is a rather fast
+    operation, so only few images are sacrificed. We recommend you to
+    plan your observations using <a href="%28http://stellarium.org/">Stellarium</a>
+    (<a href="http://stellarium.org/">http://stellarium.org/</a>).<br
+      class="Apple-interchange-newline">
+    <br>
+    A typical programming for a night could be, after the mount
+    alignment:<font color="#ff0000"><b><br>
+        <br>
+        <br>
+        WARNING</b></font> If the mount has to reverse, you may loose
+    the computer remote control, and would then need to select
+    physically the Yes/No buttons on the StarBook. The mount status will
+    then be <b>USER,</b> and the StarBook screen shows a '<b>Telescope
+      will now reverse</b>' message. To avoid this, make sure you choose
+    targets which do not pass the meridian (i.e. remain either on the
+    East or West side).<span style="color: rgb(36, 41, 46); font-family:
+      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
+      Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;,
+      &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;
+      font-size: 16px; font-style: normal; font-variant-ligatures:
+      normal; font-variant-caps: normal; font-weight: 400;
+      letter-spacing: normal; orphans: 2; text-align: start;
+      text-indent: 0px; text-transform: none; white-space: normal;
+      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
+      background-color: rgb(255, 255, 255); text-decoration-style:
       initial; text-decoration-color: initial; display: inline
       !important; float: none;"></span>
     <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
@@ -541,9 +585,11 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
           ra, dec)</strong>: send StarBook to RA/DEC (given in HH:MM and
         Deg:MM). When the RA/DEC are not given, a dialogue is shown.</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>gotoradec(sb,
+
 
           'M 51')</b>: send StarBook to a named object.<br>
       </li>
@@ -582,6 +628,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">Other
+
 
 
 
@@ -628,10 +675,12 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
         get/set the zoom level. z can be 'in','out' or in 0-8</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>date(sb):</b>
         get the StarBook date/time</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>chart(sb)</b>:&nbsp;
+
 
 
         open <a
@@ -728,6 +777,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
       copy the files. Then type commands above.</p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -747,8 +797,10 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -768,6 +820,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">We
+
 
 
 
@@ -848,6 +901,7 @@ href="https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload"
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><strong
         style="box-sizing: border-box; font-weight: 600;">rubytelescopeserver:
+
 
 
 

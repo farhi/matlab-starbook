@@ -16,19 +16,15 @@ This way you can fully control, and plan the sky observations from your sofa, wh
 Usage
 -----
 
-The mount should have been aligned and configured (date, location, equilibration) before, and the StarBook IP should be read accessing the 'About STAR BOOK' menu item.
+The mount should have been aligned and configured (date, location, equilibration) before, and the StarBook IP should be read accessing the 'About STAR BOOK' menu item. For the alignment, it is recommended to use at least 4 stars, possibly up to 9.
+
 Then use e.g.:
 
 ```matlab
 >> sb = starbook('169.254.1.1');
 ```
 
-to establish the connection. Use 'sim' as IP to connect to a simulated StarBook.
-The easiest is to (re)display the starbook screen image with
-
-```matlab
->> sb.image
-```
+to establish the connection. Use 'sim' as IP to connect to a simulated StarBook. A view of the Starbook screen appears.
 
 The buttons are active in a similar way to the physical ones. The mouse wheel allows to zoom in/out, and the display is regularly updated (5 sec).
 You can access more actions from the top menu.
@@ -43,6 +39,7 @@ Progamming the StarBook
 You may as well control the StarBook programmatically, using the methods below with the 'sb' object. To close the StarBook image in this case you may use:
 
 ```matlab
+>> sb=starbook;
 >> close(sb)
 >> image(sb)  % re-open it
 ```
@@ -50,13 +47,17 @@ You may as well control the StarBook programmatically, using the methods below w
 You may directly point to a named object or coordinates with:
 
 ```matlab
+>> sb=starbook;
 >> sb.gotoradec('M 51');
 >> sb.gotoradec('13h29m52.30s','+47d11m40.0s');
 ```
 
+The named objects have the syntax 'Catalog ID', where the space in between is mandatory. So, use 'M 51', not 'M51'. The available catalogs are those given with SkyChart (https://github.com/farhi/matlab-skychart), but SkyChart is not required as the Catalogs are now included in StarBook.
+
 To check if the mount has reached its position, use:
 
 ```matlab
+>> sb=starbook;
 >> sb.getstatus
 ```
 
@@ -76,21 +77,24 @@ You may as well request to wait for the mount to end movement with:
 
 A typical programming for a night could be, after the mount alignment:
 ```matlab
+addpath('/path/to/matlab-starbook')
 diary on % to record the night session
 disp([ datestr(now) ': Starting' ])
 sb=starbook('192.168.1.19');
-for target={'M 51','M81','M101'}
+for target={'M 51','M 81','M 101'}
   disp([ datestr(now) ': Pointing towards ' target{1} ])
   sb.gotoradec(target{1});
   waitfor(sb);
-  imwrite(sb.getscreen, [ 'starbook_' target{1} '_' datestr(now, 30) '.png' ])
+  disp([ datestr(now) ' ' sb.getstatus ])
+  imwrite(sb.getscreen, [ 'starbook_' datestr(now, 30) '.png' ])
   pause(3600)
 end
-home(sb)
-
+disp([ datestr(now) ': Ending' ])
+home(sb); % back to safe position, to avoid dew on the mirror
 ```
+Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you plan your observations using Stellarium (http://stellarium.org/).
 
-**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status should then be USER.
+**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a 'Telescope will now reverse' message. To avoid this, make sure you choose targets which do not pass the meridian (i.e. remain either on the East or West side). 
 
 Methods
 -------

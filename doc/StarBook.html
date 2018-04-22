@@ -66,6 +66,7 @@
 
 
 
+
       this is a Matlab class to control the Vixen <a
         href="https://www.vixenoptics.co.uk/Pages/star_book.htm">StarBook</a>
       for telescope mounts. Compatibility with the <a
@@ -77,8 +78,10 @@
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -111,13 +114,14 @@
 
 
 
+
       way you can fully control, and plan the sky observations from your
       sofa, while it's freezing outside.<br>
     </p>
     <div align="center"><a
         href="https://www.vixenoptics.co.uk/Pages/star_book.htm"><img
-          alt="Starbook" title="Starbook" src="Starbook.jpg"
-          height="200" width="156" border="0"></a></div>
+          alt="Starbook" title="Starbook" src="Starbook.jpg" border="0"
+          height="200" width="156"></a></div>
     <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
       16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
       padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
@@ -155,6 +159,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">The
+
 
 
 
@@ -206,6 +211,7 @@
 
 
 
+
       use e.g.:</p>
     <div class="highlight highlight-source-matlab" style="box-sizing:
       border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
@@ -239,6 +245,7 @@
 
 
 
+
       establish the connection and display the StarBook screen. When the
       IP is not given, a dialogue shows up.
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -262,6 +269,7 @@
 
 
 
+
       buttons are active in a similar way to the physical ones. The
       mouse wheel allows to zoom in/out, and the display is regularly
       updated (5 sec). You can access more actions from the top menus.</p>
@@ -277,7 +285,7 @@
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">&nbsp;<img
         alt="screen_valid" title="screen_valid" src="screen_valid.png"
-        height="473" align="middle" width="560"> <br>
+        align="middle" height="473" width="560"> <br>
       <br>
     </p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
@@ -291,8 +299,8 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><img
-        alt="static" title="static" src="screen.png" height="100"
-        align="right" width="133">If the StarBook image can not be
+        alt="static" title="static" src="screen.png" align="right"
+        height="100" width="133">If the StarBook image can not be
       retrieved (e.g with a <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
 
@@ -302,8 +310,10 @@
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -341,6 +351,7 @@
       widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">Progamming
 
+
       the StarBook</h2>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -370,6 +381,7 @@
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">You
 
+
       may directly point to a named object or coordinates with:
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <br class="Apple-interchange-newline">
@@ -394,6 +406,7 @@
     The available catalogues are those given with <a
       href="https://github.com/farhi/matlab-skychart">SkyChart</a> (<a
       href="https://github.com/farhi/matlab-skychart">https://github.com/farhi/matlab-skychart</a>),
+
     but SkyChart is not required as the catalogues are now included in
     StarBook.<br>
     <br>
@@ -473,11 +486,8 @@ home(sb); <span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115,
     be blurred when the mount moves, but this is a rather fast
     operation, so only few images are sacrificed. We recommend you to
     plan your observations using <a href="%28http://stellarium.org/">Stellarium</a>
-    (<a href="http://stellarium.org/">http://stellarium.org/</a>).<br
-      class="Apple-interchange-newline">
-    <br>
-    A typical programming for a night could be, after the mount
-    alignment:<font color="#ff0000"><b><br>
+    (<a href="http://stellarium.org/">http://stellarium.org/</a>).<font
+      color="#ff0000"><b><br>
         <br>
         <br>
         WARNING</b></font> If the mount has to reverse, you may loose
@@ -486,18 +496,20 @@ home(sb); <span class="pl-c" style="box-sizing: border-box; color: rgb(106, 115,
     then be <b>USER,</b> and the StarBook screen shows a '<b>Telescope
       will now reverse</b>' message. To avoid this, make sure you choose
     targets which do not pass the meridian (i.e. remain either on the
-    East or West side).<span style="color: rgb(36, 41, 46); font-family:
-      -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;,
-      Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;,
-      &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;
-      font-size: 16px; font-style: normal; font-variant-ligatures:
-      normal; font-variant-caps: normal; font-weight: 400;
-      letter-spacing: normal; orphans: 2; text-align: start;
-      text-indent: 0px; text-transform: none; white-space: normal;
-      widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;
-      background-color: rgb(255, 255, 255); text-decoration-style:
+    East or West side). Before launching an automatic sequence, make
+    sure the scope can not collide <span style="color: rgb(36, 41, 46);
+      font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe
+      UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color
+      Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI
+      Symbol&quot;; font-size: 16px; font-style: normal;
+      font-variant-ligatures: normal; font-variant-caps: normal;
+      font-weight: 400; letter-spacing: normal; orphans: 2; text-align:
+      start; text-indent: 0px; text-transform: none; white-space:
+      normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:
+      0px; background-color: rgb(255, 255, 255); text-decoration-style:
       initial; text-decoration-color: initial; display: inline
-      !important; float: none;"></span>
+      !important; float: none;"></span>with anything around (mount,
+    pillar, cable...).
     <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
       16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
       padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
@@ -586,9 +598,11 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
           ra, dec)</strong>: send StarBook to RA/DEC (given in HH:MM and
         Deg:MM). When the RA/DEC are not given, a dialogue is shown.</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>gotoradec(sb,
+
 
 
           'M 51')</b>: send StarBook to a named object.<br>
@@ -628,6 +642,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">Other
+
 
 
 
@@ -676,10 +691,12 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
         get/set the zoom level. z can be 'in','out' or in 0-8</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>date(sb):</b>
         get the StarBook date/time</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>chart(sb)</b>:&nbsp;
+
 
 
 
@@ -778,6 +795,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
       copy the files. Then type commands above.</p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -798,8 +816,10 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -820,6 +840,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">We
+
 
 
 
@@ -901,6 +922,7 @@ href="https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload"
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><strong
         style="box-sizing: border-box; font-weight: 600;">rubytelescopeserver:
+
 
 
 

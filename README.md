@@ -95,7 +95,7 @@ home(sb); % back to safe position, to avoid dew on the mirror
 ```
 Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you to plan your observations using Stellarium (http://stellarium.org/).
 
-**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a 'Telescope will now reverse' message. To avoid this, make sure you choose targets which do not pass the meridian (i.e. remain either on the East or West side). 
+**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a **'Telescope will now reverse'** message. To avoid this, make sure you choose targets which do not pass the meridian (i.e. remain either on the East or West side). Before launching an automatic sequence, make sure the scope can not collide with anything around (mount, pillar, cable...). 
 
 Methods
 -------

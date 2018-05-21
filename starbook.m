@@ -78,6 +78,7 @@ classdef starbook < handle
   %   date(sb):       get the starbook date/time
   %   chart(sb):      open skychart (when available)
   %   findobj(sb,obj) search for an object name in star/DSO catalogs
+  %   reset(sb):      hibernate the mount. Use start(sb) to restart.
   %
   % Credits: 
   % urldownload : version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016
@@ -420,6 +421,13 @@ classdef starbook < handle
       end
     end % start
     
+    function reset(self)
+      % reset(sb): hibernate the mount. A 'start' command is needed to restart.
+      if ~self.simulate
+        disp([ mfilename ': [' datestr(now) '] rest (park). Use "start" to restart.' ]);
+        queue(self.ip, 'reset?reset');
+      end
+    
     function align(self)
       % align(sb): align the mount to any preset RA/DEC target
       %   One should usually issue a gotoradec, and move the mount to center
@@ -449,10 +457,10 @@ classdef starbook < handle
       % Useful for telling if the mount should reverse
       % check if the mount is close to revert
       if abs(abs(self.x) - self.round/4) < self.round/4/10
-        disp([ mfilename ': mount is close to reverse on X (east-west=RA) motor.' ])
+        disp([ mfilename ': mount is close to reverse on X (east-west=RA) motor. Delta=' num2str(abs(abs(self.x) - self.round/4)) ])
       end
       if abs(abs(self.y) - self.round/2) < self.round/2/10
-        disp([ mfilename ': mount is close to reverse on YX (north-south=DEC) motor.' ])
+        disp([ mfilename ': mount is close to reverse on Y (north-south=DEC) motor. Delta=' num2str(abs(abs(self.y) - self.round/2)) ])
       end
       s = sprintf('X=%d Y=%d', self.x, self.y);
     end % getxy
@@ -461,7 +469,7 @@ classdef starbook < handle
       % im=getscreen(self): get an image of the current StarBook screen
       %   You may then plot the result with 'image(im)'
     
-      % bitmap of whats on the screen. 320x240 12bit raw image file.
+      % bitmap of what's on the screen. 320x240 12bit raw image file.
       % this takes about 0.5 sec
       
       % there is an issue as Matlab's urlread stops before end of message when
@@ -928,7 +936,13 @@ function ButtonDownCallback(src, evnt)
   ud = get(src, 'UserData');  % get the StarBook handle
   ud.clicked_button = lab;
   set(src,       'UserData', ud);
-  set(sb.figure, 'UserData', ud);
+  try
+    set(sb.figure, 'UserData', ud);
+  catch
+    disp('Closing orphan window');
+    delete(gcbf);
+    return
+  end
   % when in GOTO state, any key -> STOP
   if strncmp(sb.state, 'GOT', 3)
     sb.stop;

@@ -423,10 +423,12 @@ classdef starbook < handle
     
     function reset(self)
       % reset(sb): hibernate the mount. A 'start' command is needed to restart.
+      close(sb);
       if ~self.simulate
         disp([ mfilename ': [' datestr(now) '] rest (park). Use "start" to restart.' ]);
         queue(self.ip, 'reset?reset');
       end
+    end % reset
     
     function align(self)
       % align(sb): align the mount to any preset RA/DEC target

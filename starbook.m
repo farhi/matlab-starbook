@@ -1109,6 +1109,7 @@ function ScrollWheelCallback(src, evnt)
   sb  = ud.StarBook;
   speed = sb.getspeed+evnt.VerticalScrollCount;
   sb.setspeed(speed);
+  figure(sb.figure);
   sb.image;
 end % ScrollWheelCallback
 

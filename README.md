@@ -51,6 +51,7 @@ You may directly point to a named object or coordinates with:
 >> sb=starbook;
 >> sb.gotoradec('M 51');
 >> sb.gotoradec('13h29m52.30s','+47d11m40.0s');
+>> sb.gotoradec('jupiter');
 ```
 
 The named objects have the syntax 'Catalog ID', where the space in between is mandatory. So, use 'M 51', not 'M51'. The available catalogs are those given with SkyChart (https://github.com/farhi/matlab-skychart), but SkyChart is not required as the Catalogs are now included in StarBook.

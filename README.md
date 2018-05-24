@@ -54,6 +54,25 @@ You may directly point to a named object or coordinates with:
 >> sb.gotoradec('jupiter');
 ```
 
+Valid names include usual names (such as Betelgeuse, Rigel, Capella, Orion nebula, ...), as well as the major Catalogs such as:
+
+- Proper Name
+- StarID
+- HD (Henry Draper)
+- HR (Harvard Revised)
+- Gliese (Gliese Catalog of Nearby Stars)
+- BayerFlamsteed denomination (Fifth Edition of the Yale Bright Star Catalog)
+- M (Messier)
+- NGC (New General Catalog)
+- IC (Index Catalog)
+- CGCG (Zwicky's Catalogue of Galaxies and of Clusters of Galaxies)
+- ESO (ESO/Uppsala Survey of the ESO(B)-Atlas)
+- IRAS (IRAS catalogue of infrared sources)
+- MCG (Morphological Catalogue of Galaxies)
+- PGC (Catalog of Principal Galaxies and LEDA)
+- UGC (Uppsala General Catalogue of Galaxies)
+- planet names
+
 The named objects have the syntax 'Catalog ID', where the space in between is mandatory. So, use 'M 51', not 'M51'. The available catalogs are those given with SkyChart (https://github.com/farhi/matlab-skychart), but SkyChart is not required as the Catalogs are now included in StarBook.
 
 To check if the mount has reached its position, use:

@@ -33,6 +33,26 @@ classdef starbook < handle
   %  >> sb.gotoradec('13h29m52.30s','+47d11m40.0s');
   %  >> sb.gotoradec('jupiter');
   %
+  % Valid names include usual names (such as Betelgeuse, Rigel, Capella, 
+  % Orion nebula, ...), as well as the major Catalogs such as:
+  %
+  %    - Proper Name
+  %    - StarID
+  %    - HD (Henry Draper)
+  %    - HR (Harvard Revised)
+  %    - Gliese (Gliese Catalog of Nearby Stars)
+  %    - BayerFlamsteed denomination (Fifth Edition of the Yale Bright Star Catalog)
+  %    - M (Messier)
+  %    - NGC (New General Catalog)
+  %    - IC (Index Catalog)
+  %    - CGCG (Zwicky's Catalogue of Galaxies and of Clusters of Galaxies)
+  %    - ESO (ESO/Uppsala Survey of the ESO(B)-Atlas)
+  %    - IRAS (IRAS catalogue of infrared sources)
+  %    - MCG (Morphological Catalogue of Galaxies)
+  %    - PGC (Catalog of Principal Galaxies and LEDA)
+  %    - UGC (Uppsala General Catalogue of Galaxies)
+  %    - planet names
+  %
   %  To check if the mount has reached its position, use:
   %
   %  >> sb.getstatus

@@ -31,6 +31,7 @@ classdef starbook < handle
   %
   %  >> sb.gotoradec('M 51');
   %  >> sb.gotoradec('13h29m52.30s','+47d11m40.0s');
+  %  >> sb.gotoradec('jupiter');
   %
   %  To check if the mount has reached its position, use:
   %
@@ -79,6 +80,7 @@ classdef starbook < handle
   %   chart(sb):      open skychart (when available)
   %   findobj(sb,obj) search for an object name in star/DSO catalogs
   %   reset(sb):      hibernate the mount. Use start(sb) to restart.
+  %   queue(sb, cmd)  send a command
   %
   % Credits: 
   % urldownload : version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016
@@ -251,7 +253,7 @@ classdef starbook < handle
       %   a single number
       %   a vector [H,M] or [H,M,S]
       %   a string such as HHhMMmSSs, HH:MM:SS, HHhMM, HH:MM
-      %   an object name (such as M 51)
+      %   an object name (such as 'M 51' or 'jupiter')
       % Declinaison can be given as:
       %   separate DEG, M arguments
       %   a single number
@@ -288,6 +290,11 @@ classdef starbook < handle
         end
         return
       elseif nargin == 2 && ischar(ra_h)
+        if any(strcmp(lower(ra_h), ...
+          {'jupiter','saturn','moon','mars','mercury','neptune','plutot','uranus','venus'}))
+          self.queue([ 'goto' ra_h ]);
+          return
+        end
         found = findobj(self, ra_h);
         if isempty(found)
           disp([ mfilename ': gotoradec: can not find object ' ra_h ])
@@ -689,6 +696,12 @@ classdef starbook < handle
         pause(2)
       end
     end % waitfor
+    
+    function [val, str] = queue(self, input, output)
+      if nargin < 2, val=[]; str=[]; return; end
+      if nargin < 3, output = ''; end
+      [val, str] = queue(self.ip, input, output);
+    end % queue
   
   end % methods
   

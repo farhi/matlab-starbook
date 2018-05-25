@@ -450,7 +450,7 @@ classdef starbook < handle
     
     function reset(self)
       % reset(sb): hibernate the mount. A 'start' command is needed to restart.
-      close(sb);
+      close(self);
       if ~self.simulate
         disp([ mfilename ': [' datestr(now) '] rest (park). Use "start" to restart.' ]);
         queue(self.ip, 'reset?reset');

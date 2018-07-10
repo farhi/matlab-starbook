@@ -902,7 +902,7 @@ function h = image_build(tag, ip, ud, self)
   uimenu(m, 'Label', 'Update view','Callback', @MenuCallback, ...
     'Accelerator','u');
   src=uimenu(m, 'Label', 'Auto Update View', ...
-    'Callback', @MenuCallback, 'Checked','on');
+    'Callback', @MenuCallback, 'Checked','on','UserData',self);
   t = uimenu(m, 'Label', 'Open SkyChart', 'Callback', @MenuCallback, ...
     'Separator','on');
   if ~exist('skychart'), set(t, 'Enable','off'); end
@@ -1079,22 +1079,23 @@ function MenuCallback(src, evnt)
     lab = get(src, 'Name');
     lab = 'close';
   end
+  
   switch lower(strtok(lab))
   case 'auto'
     % get the state
     checked = get(src, 'Checked');
     % get the timer
-    t = get(src,'UserData');
-    if isempty(t)
+    s = get(src,'UserData');
+    if isempty(s)
       return
     end
     if strcmp(checked,'off')
       % check and start timer
       set(src, 'Checked','on');
-      if strcmp(t.Running,'off') start(t); end
+      if strcmp(s.timer.Running,'off') start(s.timer); end
     else
       set(src, 'Checked','off');
-      if strcmp(t.Running,'on') stop(t); end
+      if strcmp(s.timer.Running,'on') stop(s.timer); end
     end
   otherwise
     feval(@ButtonDownCallback, gcbf, lab);

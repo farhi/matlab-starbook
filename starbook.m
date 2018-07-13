@@ -358,6 +358,7 @@ classdef starbook < handle
         disp([ 'SIMU: ' cmd ]);
         gotoradec(self, 0, 0);
       end
+      waitfor(self);
     end % home
     
     function move(self, north, south, east, west)

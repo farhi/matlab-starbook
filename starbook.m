@@ -26,7 +26,8 @@ classdef starbook < handle
   %
   %   sb = starbook('sim');
   %
-  % or use 'sim' as IP in the input dialogue.
+  %  or use 'sim' as IP in the input dialogue.
+  %
   %  You may directly point to a named object or coordinates with:
   %
   %  >> sb.gotoradec('M 51');
@@ -65,13 +66,15 @@ classdef starbook < handle
   %  - INIT: not ready yet
   %  - CHART: in Chart mode
   %
-  % You may as well request to wait for the mount to end movement with:
+  % You may as well request to wait for the mount to wait for movement completion with:
   % 
   %  >> waitfor(sb)
   %
   % WARNING: if the mount has to reverse, you may loose the computer remote control, 
   % and would then need to select physically the Yes/No buttons on the StarBook.
-  % The mount status should then be USER.
+  % The mount status should then be USER. To avoid that, repeat a gotoradec command
+  % at the current location, every say 30 min. When passing the meridian, the mount 
+  % will then reverse when re-positioning.
   %
   % Methods:
   %   starbook(ip):   connect to a StarBook controller
@@ -358,7 +361,6 @@ classdef starbook < handle
         disp([ 'SIMU: ' cmd ]);
         gotoradec(self, 0, 0);
       end
-      waitfor(self);
     end % home
     
     function move(self, north, south, east, west)

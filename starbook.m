@@ -685,7 +685,7 @@ classdef starbook < handle
       if ~any(name == ' ')
         [n1,n2]  = strtok(name, '0123456789');
         found = findobj(self, [ n1 ' ' n2 ]);
-        if ~isempty(name) return; end
+        if ~isempty(found) return; end
       end
       
       for f=catalogs(:)'

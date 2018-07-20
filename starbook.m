@@ -687,20 +687,21 @@ classdef starbook < handle
         found = findobj(self, [ n1 ' ' n2 ]);
         if ~isempty(found) return; end
       end
-      
+      namel = lower(name);
       for f=catalogs(:)'
         catalog = self.catalogs.(f{1});
         if ~isfield(catalog, 'MAG'), continue; end
+        NAME = lower(catalog.NAME);
         % search for name
-        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ ';' name ';' ])));
+        index = find(~cellfun(@isempty, strfind(NAME, [ ';' namel ';' ])));
         if isempty(index)
-        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ name ';' ])));
+        index = find(~cellfun(@isempty, strfind(NAME, [ namel ';' ])));
         end
         if isempty(index)
-        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ ';' name ])));
+        index = find(~cellfun(@isempty, strfind(NAME, [ ';' namel ])));
         end
         if isempty(index)
-        index = find(~cellfun(@isempty, strfind(catalog.NAME, [ name ])));
+        index = find(~cellfun(@isempty, strfind(NAME, [ namel ])));
         end
         if ~isempty(index)
           found.index   = index(1);

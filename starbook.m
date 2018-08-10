@@ -326,6 +326,11 @@ classdef starbook < handle
         [dec_deg, dec_min] = getdec(found.DEC);
         % Right Ascension
         [ra_h, ra_min]     = getra(found.RA/15);
+      elseif nargin == 2 && isstruct(ra_h)
+        found = ra_h;
+        [dec_deg, dec_min] = getdec(found.DEC);
+        % Right Ascension
+        [ra_h, ra_min]     = getra(found.RA/15);
       elseif nargin == 3
         % Declinaison
         [dec_deg, dec_min] = getdec(ra_min);
@@ -452,11 +457,13 @@ classdef starbook < handle
     end % start
     
     function reset(self)
-      % reset(sb): hibernate the mount. A 'start' command is needed to restart.
+      % reset(sb): reset the StarBook to its start-up screen. 
       close(self);
+      stop(self);
       if ~self.simulate
         disp([ mfilename ': [' datestr(now) '] rest (park). Use "start" to restart.' ]);
-        queue(self.ip, 'reset?reset');
+        cmd = [ 'http://' self.ip '/reset?reset' ];
+        url = java.net.URL(cmd);
       end
     end % reset
     
@@ -717,8 +724,83 @@ classdef starbook < handle
 
       if ~isempty(found)
         disp([ mfilename ': Found object ' name ' as: ' found.NAME ])
+        disp(sprintf('  %s: Magnitude: %.1f Type: %s', ...
+          found.catalog, found.MAG, found.TYPE ));
       end
     end % findobj
+    
+    function g=grid(self, RA, DEC, n, da)
+      % grid(sb): return a 3x3 grid around given object or RA/DEC
+      % grid(sb, RA, DEC, n, da): build a n x n grid around RA/DEC with angular step da
+      % grid(sb, name,    n, da): build a n x n grid around named object
+      %
+      %   The grid size can be given as n = [nDEC nRA] to specify a non-square grid
+      %   as well as similarly for the angular step da = [dDEC dRA]
+      %
+      %   The angular step should be e.g. the field of view (FOV) in order to 
+      %   build a panorama / stitch view.
+      %   When using a focal length F with a camera sensor size S, the FOV is:
+      %     FOV = S/F*57.3 [deg], where S and F should e.g. be in [mm]
+      %
+      %   With a 1200 mm focal length and an APS-C sensor 23.5x15.6, the FOV is:
+      %     FOV = 0.74 and 1.12 [deg]
+      %   With a 400 mm focal length and similar sensor:
+      %     FOV = 2.23 and 3.36 [deg]
+      %     
+      
+      if nargin < 2, RA =[]; end
+      if nargin < 3, DEC=[]; end
+      if nargin < 4, n  =[]; end
+      if nargin < 5, da =[]; end
+      
+      % input as a name
+      if ischar(RA) RA = findobj(self, RA); end
+      
+      % input as a struct (from findobj)
+      if isstruct(RA) && isfield(RA, 'RA') && isfield(RA, 'DEC')
+        if nargin >= 4, da=n;  n=[]; end
+        if nargin >= 3, n=DEC; end
+        selected = RA;
+        if isempty(selected), return; end
+        RA = selected.RA/15; % deg -> hours
+        DEC= selected.DEC;
+      end
+      if ~isempty(RA) && ~isempty(DEC) && isnumeric(RA) && isnumeric(DEC)
+        RA = getra(RA);
+        DEC= getdec(DEC);
+      else return; end
+      
+      if isempty(RA)
+        RA = self.target_ra.h+self.target_ra.min/60;
+      end
+      if isempty(DEC)
+        DEC= self.target_dec.deg+self.target_dec.min/60;
+      end
+      if isempty(n), n=3;     end
+      if isempty(da) da=0.75; end
+      
+      g = []; % list of targets
+      
+      if all(isfinite(n)) && all(isfinite(da))
+        if isscalar(n),  n  = [n  n]; end
+        if isscalar(da), da = [da da]; end
+        n = round(n);
+        index=1;
+        for dec = DEC+da(1)*((0:(n(1)-1))-(n(1)-1)/2)
+          for ra = RA+da(2)*((0:(n(2)-1))-(n(2)-1)/2)
+            found.index   = index;
+            found.catalog = 'starbook';
+            found.RA      = getra(ra)*15; % hours -> deg
+            found.DEC     = getdec(dec);
+            found.MAG     = 0;
+            found.TYPE    = 'grid';
+            found.NAME    = sprintf('RA=%.2f DEC=%.2f', ra, dec);
+            g     = [ g found ];
+            index = index+1;
+          end
+        end
+      end
+    end % grid
     
     function waitfor(self)
       % waitfor: waits for the mount to be idle (not moving)
@@ -833,6 +915,9 @@ function [ra_h, ra_min] = getra(ra)
     disp([ mfilename ': invalid RA.' ])
     disp(ra)
   end
+  if nargout == 1
+    ra_h = ra_h+ra_min/60;
+  end
 end % getra
 
 function str = repradec(str)
@@ -860,6 +945,9 @@ function [dec_deg, dec_min] = getdec(dec)
   else
     disp([ mfilename ': invalid DEC' ])
     disp(dec)
+  end
+  if nargout == 1
+    dec_deg = dec_deg + dec_min/60;
   end
 end % getdec
 

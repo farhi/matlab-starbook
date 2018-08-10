@@ -87,6 +87,7 @@ classdef starbook < handle
   %   image(sb):      display the StarBook image (only for 320*240 screen)
   %   home(sb):       send the SB to its HOME position
   %   help(sb):       open the Help page
+  %   grid(sb):       build a grid around the target. Goto to items with gotoradec.
   %
   % Other minor commands
   %   start(sb):      set/reset the StarBook in SCOPE mode
@@ -464,6 +465,7 @@ classdef starbook < handle
         disp([ mfilename ': [' datestr(now) '] rest (park). Use "start" to restart.' ]);
         cmd = [ 'http://' self.ip '/reset?reset' ];
         url = java.net.URL(cmd);
+        url.openConnection;
       end
     end % reset
     
@@ -747,6 +749,12 @@ classdef starbook < handle
       %   With a 400 mm focal length and similar sensor:
       %     FOV = 2.23 and 3.36 [deg]
       %     
+      % To use a 3x3 grid, you may use:
+      %
+      %   for t=sb.grid('M 51', 3); 
+      %     sb.gotoradec(t); 
+      %     waitfor(sb); pause(1800); 
+      %   end
       
       if nargin < 2, RA =[]; end
       if nargin < 3, DEC=[]; end

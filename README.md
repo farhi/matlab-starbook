@@ -96,6 +96,8 @@ You may as well request to wait for the mount to end movement with:
 >> waitfor(sb)
 ```
 
+**Programm for a night**
+
 A typical programming for a night could be, after the mount alignment:
 ```matlab
 addpath('/path/to/matlab-starbook')
@@ -108,14 +110,28 @@ for target={'M 51','M 81','M 101'}
   waitfor(sb);
   disp([ datestr(now) ' ' sb.getstatus ])
   imwrite(sb.getscreen, [ 'starbook_' datestr(now, 30) '.png' ])
-  pause(3600)
+  pause(1800)
 end
 disp([ datestr(now) ': Ending' ])
 home(sb); % back to safe position, to avoid dew on the mirror
 ```
-Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you to plan your observations using Stellarium (http://stellarium.org/).
+Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you to plan your observations using Stellarium (http://stellarium.org/) and http://sky-map.org
 
-**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a **'Telescope will now reverse'** message. To avoid this, make sure you choose targets which do not pass the meridian (i.e. remain either on the East or West side). Before launching an automatic sequence, make sure the scope can not collide with anything around (mount, pillar, cable...). 
+**Building a grid (panorama)**
+
+You may prepare a grid around a target in view to assemble larger panorama view.
+
+The **grid** method returns a list of positions, which you can send the mount to, for instance:
+
+```matlab
+for target=sb.grid('M 51'); 
+  sb.gotoradec(target); 
+  waitfor(sb); % wait for position
+  pause(1800); % wait for acquisition (DSLR)
+end
+```
+
+**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a **'Telescope will now reverse'** message. To avoid this, make sure you choose targets which do not pass the meridian (i.e. remain either on the East or West side). You may as well reposition every 30 min to allow programmatic reversal. Before launching an automatic sequence, make sure the scope can not collide with anything around (mount, pillar, cable...). 
 
 Methods
 -------
@@ -130,6 +146,7 @@ Methods
 - **image(sb)**:      display the StarBook image (only for 320*240 screen)
 - **home(sb)**:       send the SB to its HOME position
 - **help(sb)**:       open the Help page
+- **grid**:           build a grid around target
 
 Other minor commands
 

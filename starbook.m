@@ -136,6 +136,7 @@ classdef starbook < handle
     timer     = [];       % the current Timer object which sends a getstate regularly
     start_time= datestr(now);
     simulate  = false;
+    revert    = false;
     figure    = [];
     skychart  = [];
     catalogs  = [];
@@ -225,7 +226,7 @@ classdef starbook < handle
       end
     end % load
     
-    function s = getstatus(self)
+    function [s, revert] = getstatus(self)
       % s=getstatus(sb): update object with current status
       %    Return a string indicating status.
       
@@ -234,6 +235,8 @@ classdef starbook < handle
       %       Scope mode => SCOPE
       %       Chart mode => CHART
       %       In a menu  => USER
+      
+      % called in: update (TimerCallback), web, waitfor
       if ~self.simulate
         ret = queue(self.ip, 'getstatus', ...
           'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
@@ -264,9 +267,24 @@ classdef starbook < handle
       if goto
         self.state = 'GOTO';
       end
-      getxy(self);  % update coder values
+      [coders, revert] = getxy(self);  % update coder values
       s = sprintf('RA=%d+%f DEC=%d+%f [%s]', ...
         self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state);
+      if revert && ~self.revert
+        disp([ mfilename ': [' datestr(now) ']: reverting mount...'])
+        self.revert = true;
+        % reposition scope to its coordinates
+        ra = self.ra;
+        dec= self.dec;
+        % x > 0: ra.min - 5 lowers the delta -> triggers reversal
+        % x < 0: ra.min + 5 lowers the delta -> triggers reversal
+        delta = sign(self.x)*5;
+        self.gotoradec(ra.h, ra.min+delta, dec.deg, dec.min);
+        waitfor(self);
+        self.gotoradec(ra.h, ra.min,       dec.deg, dec.min);
+        waitfor(self);
+      else self.revert = false;
+      end
     end % getstatus
 
     function gotoradec(self, ra_h, ra_min, dec_deg, dec_min)
@@ -455,6 +473,9 @@ classdef starbook < handle
       else
         disp([ 'SIMU: ' 'start' ]);
       end
+      try
+        start(self.timer);
+      end
     end % start
     
     function reset(self)
@@ -482,7 +503,7 @@ classdef starbook < handle
       % display target and current RA/DEC
     end % align
     
-    function s=getxy(self)
+    function [s, revert]=getxy(self)
       % getxy(sb): update mount motors coder values
       if ~self.simulate
         xy     = queue(self.ip, 'getxy', 'X=%d&Y=%d');
@@ -497,13 +518,29 @@ classdef starbook < handle
       % Y is the Dec axis ranges from from about -432000(south) to +432000(north)
       % Useful for telling if the mount should reverse
       % check if the mount is close to revert
-      if abs(abs(self.x) - self.round/4) < self.round/4/10
-        disp([ mfilename ': mount is close to reverse on X (east-west=RA) motor. Delta=' num2str(abs(abs(self.x) - self.round/4)) ])
+      % on RA, x can reach +/- round/4 as a 1/4th round
+      if self.x < 0 % limit is -self.round/4
+        delta_ra = (double(self.round/4) + double(self.x))/double(self.round);
+      else
+        delta_ra = (double(self.round/4) - double(self.x))/double(self.round);
       end
-      if abs(abs(self.y) - self.round/2) < self.round/2/10
-        disp([ mfilename ': mount is close to reverse on Y (north-south=DEC) motor. Delta=' num2str(abs(abs(self.y) - self.round/2)) ])
+      if delta_ra <= -0.0095
+        disp([ mfilename ': mount is close to reverse on X (east-west=RA) motor. Delta=' ...
+        num2str(delta_ra*100) ' % i.e. ' num2str(delta_ra*1800) ' min wrt meridian.' ])
+      end
+      % on DEC, y can reach +/- round, then has to revert
+      delta_dec = double(abs(abs(self.y) -  self.round))/double(self.round);
+      if delta_dec < 0.10
+        disp([ mfilename ': mount is close to reverse on Y (north-south=DEC) motor. Delta='...
+        num2str(delta_dec*100) ' % i.e. ' num2str(delta_dec*360) ' deg' ])
       end
       s = sprintf('X=%d Y=%d', self.x, self.y);
+      
+      if delta_ra <= -0.01 || delta_dec < 0.01
+        revert = true;
+      else revert = false;
+      end
+        
     end % getxy
     
     function W = getscreen(self)
@@ -592,7 +629,7 @@ classdef starbook < handle
     
     function update(self)
       % update(sb): update the starbook status and image
-      getstatus(self);
+      [s, revert] = getstatus(self);
       if ishandle(self.figure)
         image(self);
       else self.figure = []; end

@@ -152,11 +152,11 @@ Other minor commands
 
 - **start(sb)**:      set/reset the StarBook in SCOPE mode
 - **getspeed(sb)**:   return the current zoom/mount speed 
-- **getstatus(sb)**:  update the StarBook state
-- **getxy(sb)**:      update motor coders
+- **getstatus(sb)**:  read the StarBook state
+- **getxy(sb)**:      read motor coders
 - **getscreen(sb)**:  get the StarBook image as an RGB matrix
-- **update(sb)**:     update status and image
-- **plot(sb)**:       same as image(sb)
+- **update(sb)**:     update status and image (when figure is visible)
+- **plot(sb)**:       same as image(sb), display screen and interface
 - **close(sb)**:      close the screen view
 - **web(sb)**:        show the current target on sky-map.org
 - **zoom(sb,{z})**:   get/set the zoom level. z can be 'in','out' or in 0-8

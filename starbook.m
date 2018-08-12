@@ -715,9 +715,6 @@ classdef starbook < handle
     
     function close(self)
       % close(sb): close the starbook
-      if ~isempty(self.timer) && isvalid(self.timer)
-        stop(self.timer); 
-      end
       if ishandle(self.figure); delete(self.figure); end
       self.figure = [];
     end

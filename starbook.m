@@ -72,9 +72,9 @@ classdef starbook < handle
   %
   % WARNING: if the mount has to reverse, you may loose the computer remote control, 
   % and would then need to select physically the Yes/No buttons on the StarBook.
-  % The mount status should then be USER. To avoid that, repeat a gotoradec command
-  % at the current location, every say 30 min. When passing the meridian, the mount 
-  % will then reverse when re-positioning.
+  % The mount status should then be USER. To avoid that, check Auto Mount Reversal
+  % menu item in the View menu. Before launching an automatic sequence, make sure the
+  % scope can not collide with anything around (mount, pillar, cable...). 
   %
   % Methods:
   %   starbook(ip):   connect to a StarBook controller
@@ -88,6 +88,7 @@ classdef starbook < handle
   %   home(sb):       send the SB to its HOME position
   %   help(sb):       open the Help page
   %   grid(sb):       build a grid around the target. Goto to items with gotoradec.
+  %   waitfor(sb)     wait for the mount to stop moving
   %
   % Other minor commands
   %   start(sb):      set/reset the StarBook in SCOPE mode
@@ -105,6 +106,7 @@ classdef starbook < handle
   %   findobj(sb,obj) search for an object name in star/DSO catalogs
   %   reset(sb):      hibernate the mount. Use start(sb) to restart.
   %   queue(sb, cmd)  send a command
+  %   revert(sb)      attempt a mount reversal. Must be close within 5 min.
   %
   % Credits: 
   % urldownload : version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016
@@ -129,6 +131,9 @@ classdef starbook < handle
     version   = '2.7 (simulate)';
     place     = { 'E' 5 2 'N' 45 2 0 };       % GPS location and hour shift/UTC
     UserData  = [];
+    rate_ra   = 0;
+    delta_ra  = 0;
+    autoreverse=true;
     
   end % properties
   
@@ -136,10 +141,14 @@ classdef starbook < handle
     timer     = [];       % the current Timer object which sends a getstate regularly
     start_time= datestr(now);
     simulate  = false;
-    revert    = false;
+    revert_flag= false;   % true during an auto reverse action
     figure    = [];
     skychart  = [];
     catalogs  = [];
+    x_goto    = [];
+    y_goto    = [];
+    t_goto    = [];
+    autoscreen= true;
   end % properties
   
   methods
@@ -202,7 +211,7 @@ classdef starbook < handle
           'Period', 5.0, 'ExecutionMode', 'fixedDelay', 'UserData', sb, ...
           'Name', mfilename);
       % display screen
-      disp([ mfilename ': [' datestr(now) '] Welcome to StarBook ' sb.version ])
+      disp([ mfilename ': [' datestr(now) ']: Welcome to StarBook ' sb.version ])
       image(sb); % also start the timer
       
     end % starbook
@@ -226,7 +235,7 @@ classdef starbook < handle
       end
     end % load
     
-    function [s, revert] = getstatus(self)
+    function [s, rev] = getstatus(self)
       % s=getstatus(sb): update object with current status
       %    Return a string indicating status.
       
@@ -256,7 +265,7 @@ classdef starbook < handle
         if abs(dRA) > .01 || abs(dDEC) > .01
           goto=1;
         else goto=0; end
-        ret={ RA_h, RA_min, DEC_deg, DEC_min, goto, 'SCOPE' };
+        ret={ RA_h, RA_min, DEC_deg, DEC_min, goto, 'SCOP' };
       end
       [self.ra.h, self.ra.min, self.dec.deg, self.dec.min, goto] = deal(ret{1:5});
       self.ra.h    = double(self.ra.h);
@@ -267,27 +276,32 @@ classdef starbook < handle
       if goto
         self.state = 'GOTO';
       end
-      [coders, revert] = getxy(self);  % update coder values
-      s = sprintf('RA=%d+%f DEC=%d+%f [%s]', ...
-        self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state);
-      if revert && ~self.revert
-        disp([ mfilename ': [' datestr(now) ']: reverting mount...'])
-        self.revert = true;
-        % reposition scope to its coordinates
-        ra = self.ra;
-        dec= self.dec;
-        % x > 0: ra.min - 5 lowers the delta -> triggers reversal
-        % x < 0: ra.min + 5 lowers the delta -> triggers reversal
-        delta = sign(self.x)*5;
-        self.gotoradec(ra.h, ra.min+delta, dec.deg, dec.min);
-        waitfor(self);
-        self.gotoradec(ra.h, ra.min,       dec.deg, dec.min);
-        waitfor(self);
-      else self.revert = false;
-      end
+      [coders, rev] = getxy(self);  % update coder values
+      s = sprintf('RA=%d+%f DEC=%d+%f [%s] %s', ...
+        self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state, coders);
+      if rev && ~self.revert_flag && self.autoreverse
+        disp(s);
+        revert(self);
+      end 
+      
     end % getstatus
+    
+    function revert(self)
+    % revert; trigger a mount reversal (when close to)
+    
+      % must be in SCOP (IDLE) state
+      if ~strcmp(self.state, 'SCOP'), return; end
+      disp([ mfilename ': [' datestr(now) ']: reverting mount...'])
+      self.revert_flag = true;
+      % reposition scope to its coordinates
+      val=self.gotoradec(self.ra, self.dec);
+      if isempty(val)
+        waitfor(self);
+      end
+      self.revert_flag = false;
+    end % revert
 
-    function gotoradec(self, ra_h, ra_min, dec_deg, dec_min)
+    function val=gotoradec(self, ra_h, ra_min, dec_deg, dec_min)
       % gotoradec(sb,ra_h, ra_min, dec_deg, dec_min): send the mount to given RA/DEC
       % gotoradec(sb, ra, dec)
       % Right Ascension can be given as:
@@ -309,7 +323,7 @@ classdef starbook < handle
       %     ERROR:FORMAT	
       %     ERROR:ILLEGAL STATE	
       %     ERROR:BELOW HORIZON
-      NL = sprintf('\n');
+      NL = sprintf('\n'); val='OK';
       if nargin == 1
         prompt = {[ '{\bf \color{blue}Enter Right Ascension RA} ' NL ...
           '(HHhMMmSSs or HH:MM:SS or HH.hh) ' NL ...
@@ -326,15 +340,15 @@ classdef starbook < handle
            sprintf('%ddeg%fm', self.dec.deg, self.dec.min)}, options);
         if isempty(answer), return; end
         if isempty(answer{2})
-          gotoradec(self, answer{1});
+          val=gotoradec(self, answer{1});
         else
-          gotoradec(self, answer{1}, answer{2});
+          val=gotoradec(self, answer{1}, answer{2});
         end
         return
       elseif nargin == 2 && ischar(ra_h)
         if any(strcmp(lower(ra_h), ...
           {'jupiter','saturn','moon','mars','mercury','neptune','plutot','uranus','venus'}))
-          self.queue([ 'goto' ra_h ]);
+          val=self.queue([ 'goto' ra_h ]);
           return
         end
         found = findobj(self, ra_h);
@@ -367,17 +381,18 @@ classdef starbook < handle
       cmd = sprintf('gotoradec?RA=%d+%f&DEC=%d+%f', ...
         self.target_ra.h,    self.target_ra.min, ...
         self.target_dec.deg, self.target_dec.min);
-      disp([ mfilename ': [' datestr(now) '] ' cmd ]);
+      disp([ mfilename ': [' datestr(now) ']: ' cmd ]);
       if ~self.simulate
-        queue(self.ip, cmd, 'OK');
+        val=queue(self.ip, cmd, 'OK');
       else
         disp([ 'SIMU: ' cmd ]);
       end
+      
     end % gotoradec
     
     function home(self)
       % home(sb): send mount to home position
-      disp([ mfilename ': [' datestr(now) '] home' ]);
+      disp([ mfilename ': [' datestr(now) ']: home' ]);
       cmd = 'gohome?home=0';
       if ~self.simulate
         queue(self.ip, cmd,'OK');
@@ -463,6 +478,7 @@ classdef starbook < handle
         self.target_dec= self.dec;
       end
       move(self, 0,0,0,0);
+      self.revert_flag = false;
     end % stop
     
     function start(self)
@@ -476,6 +492,7 @@ classdef starbook < handle
       try
         start(self.timer);
       end
+      self.revert_flag = false;
     end % start
     
     function reset(self)
@@ -483,7 +500,7 @@ classdef starbook < handle
       close(self);
       stop(self);
       if ~self.simulate
-        disp([ mfilename ': [' datestr(now) '] rest (park). Use "start" to restart.' ]);
+        disp([ mfilename ': [' datestr(now) ']: reset (park). Use "start" to restart.' ]);
         cmd = [ 'http://' self.ip '/reset?reset' ];
         url = java.net.URL(cmd);
         url.openConnection;
@@ -494,7 +511,7 @@ classdef starbook < handle
       % align(sb): align the mount to any preset RA/DEC target
       %   One should usually issue a gotoradec, and move the mount to center
       %   the actual location of the target, then issue an align.
-      disp([ mfilename ': [' datestr(now) '] align' ]);
+      disp([ mfilename ': [' datestr(now) ']: align' ]);
       if ~self.simulate
         queue(self.ip, 'align','OK');
       else
@@ -503,12 +520,20 @@ classdef starbook < handle
       % display target and current RA/DEC
     end % align
     
-    function [s, revert]=getxy(self)
+    function [s, rev]=getxy(self)
       % getxy(sb): update mount motors coder values
+      
+      rev = false;
+      
       if ~self.simulate
         xy     = queue(self.ip, 'getxy', 'X=%d&Y=%d');
       else xy = { 0 0 }; end
       [self.x,self.y] = deal(xy{:});
+      s = sprintf('X=%d Y=%d', self.x, self.y);
+      
+      if self.simulate, return; end
+      
+      % check if the mount is close to revert ----------------------------------
       
       % returns x and y coordinates of the mount. 0,0 is the power on position
       % getround / 4 is maximum east and west (negative for east) .
@@ -517,28 +542,68 @@ classdef starbook < handle
       % X is the RA axis and ranges from about -2160000 (east) to 2160000 (west).
       % Y is the Dec axis ranges from from about -432000(south) to +432000(north)
       % Useful for telling if the mount should reverse
-      % check if the mount is close to revert
+      
+      
       % on RA, x can reach +/- round/4 as a 1/4th round
-      if self.x < 0 % limit is -self.round/4
-        delta_ra = (double(self.round/4) + double(self.x))/double(self.round);
-      else
-        delta_ra = (double(self.round/4) - double(self.x))/double(self.round);
+      delta_ra = (double(self.round/4) - abs(double(self.x)))/double(self.round);
+      if delta_ra*100 <= -0.25
+        disp([ mfilename ': [' datestr(now) ']: mount is close to revert on X (east-west=RA) motor. ' ])
+        disp([ '    Delta=' num2str(delta_ra*100) ' % i.e. ' ...
+               num2str(abs(delta_ra)*1800) ' min after meridian.' ])
       end
-      if delta_ra <= -0.0095
-        disp([ mfilename ': mount is close to reverse on X (east-west=RA) motor. Delta=' ...
-        num2str(delta_ra*100) ' % i.e. ' num2str(delta_ra*1800) ' min wrt meridian.' ])
-      end
+      
       % on DEC, y can reach +/- round, then has to revert
       delta_dec = double(abs(abs(self.y) -  self.round))/double(self.round);
       if delta_dec < 0.10
-        disp([ mfilename ': mount is close to reverse on Y (north-south=DEC) motor. Delta='...
+        disp([ mfilename ': [' datestr(now) ']: mount is close to revert on Y (north-south=DEC) motor. Delta='...
         num2str(delta_dec*100) ' % i.e. ' num2str(delta_dec*360) ' deg' ])
       end
-      s = sprintf('X=%d Y=%d', self.x, self.y);
+
+      % indicate reversal when too close to USER mode
+      if delta_ra*100 <= -0.3 || delta_dec < 0.01 % reach bounds
+           rev = true;
+      end
       
-      if delta_ra <= -0.01 || delta_dec < 0.01
-        revert = true;
-      else revert = false;
+      self.delta_ra = delta_ra*1800; % in minutes
+      
+      % estimate sideral rate on X ---------------------------------------------
+      % only in SCOPE state (not GOTO)
+      scop = strcmp(self.state, 'SCOP') | strcmp(self.state, 'USER');
+      
+      % we reset the rate calculation every 60 sec
+      if ~isempty(self.t_goto)
+        dt = etime(clock, self.t_goto);
+      else dt = 0; end
+
+      if scop && dt > 60
+        scop = false; dt = 0;
+      end
+      if ~scop
+        self.x_goto=[]; self.y_goto=[]; self.t_goto=[];
+      else
+        % store the coder values for last GOTO / Update
+        if isempty(self.x_goto) self.x_goto = self.x; dt = 0; end
+        if isempty(self.y_goto) self.y_goto = self.y; end
+        if isempty(self.t_goto) self.t_goto = clock;  end
+      end
+
+      % we evaluate the rate when the time diff is larger than 10 s
+      if ~isempty(self.t_goto) && dt > 10
+        self.rate_ra = abs(double(self.x) - double(self.x_goto))/dt;
+        % compute sideral rate
+        self.rate_ra = self.rate_ra/(double(self.round)/3600/24);
+        
+        % must do a round in 24h
+        % we display a message when moving slower than 1/2 the speed
+        if self.rate_ra < 0.5
+          disp([ mfilename ': [' datestr(now) ']: WARNING: SLOW RA move' ])
+          disp([ '    rate=' num2str(self.rate_ra) ' [sideral] delta=' num2str(delta_ra*1800) ' [min wrt meridian] ' s ])
+          disp('    Check cables and tube. RA (X) is stuck ?' );
+          if delta_ra < 0
+            % try a mount reversal
+            rev = true;
+          end
+        end
       end
         
     end % getxy
@@ -577,6 +642,7 @@ classdef starbook < handle
       h = findall(0, 'Tag', tag);
       if isempty(h)
         h = image_build(tag, self.ip, ud, self);
+        set(0, 'CurrentFigure',h);
         if strcmp(self.timer.Running, 'off') start(self.timer); end
       else
         if numel(h) > 1, delete(h(2:end)); h=h(1); end
@@ -629,9 +695,9 @@ classdef starbook < handle
     
     function update(self)
       % update(sb): update the starbook status and image
-      [s, revert] = getstatus(self);
+      [s, rev] = getstatus(self);
       if ishandle(self.figure)
-        image(self);
+        if self.autoscreen, image(self); end
       else self.figure = []; end
     end % update
     
@@ -874,7 +940,7 @@ function [val, str] = queue(ip, input, output)
   cmd = [ 'http://' ip '/' input ];
   [str,status] = urlread(cmd);
   if ~status
-    error([ mfilename ': error in communication with StarBook. Check IP.']);
+    error([ mfilename ': [' datestr(now) ']: error in communication with StarBook. Check IP.']);
   end
     
   if any(output == '%') && ~isempty(findstr(str, '<!--'))
@@ -886,8 +952,12 @@ function [val, str] = queue(ip, input, output)
   elseif ~isempty(output)
     % expect a specific string as answer
     if isempty(strfind(str, output))
-      disp([ mfilename ': WARNING: unexpected answer from StarBook' ])
+      disp([ mfilename ': [' datestr(now) ']: WARNING: unexpected answer from StarBook.' ])
       disp(cmd)
+      if strfind(str, 'ILLEGAL STATE')
+        str='ERROR:ILLEGAL STATE';
+        val={ nan };
+      end
       disp(str);
     end
     
@@ -945,6 +1015,13 @@ function [ra_h, ra_min] = getra(ra)
   if ischar(ra)
     ra = repradec(ra);
   end
+  if isstruct(ra) && isfield(ra, 'RA')
+    ra = ra.RA;
+  elseif isstruct(ra) && isfield(ra, 'h') && isfield(ra, 'min')
+    ra_h = ra.h;
+    ra_min = ra.min;
+    return
+  end
   if isnumeric(ra)
     if isscalar(ra)
       ra_h   = fix(ra); ra_min = abs(ra - ra_h)*60;
@@ -975,6 +1052,13 @@ function [dec_deg, dec_min] = getdec(dec)
   % getdec: convert any input DEC into deg and min
   if ischar(dec)
     dec = repradec(dec);
+  end
+  if isstruct(dec) && isfield(dec, 'DEC')
+    dec = dec.DEC;
+  elseif isstruct(dec) && isfield(dec, 'deg') && isfield(dec, 'min')
+    dec_deg = dec.deg;
+    dec_min = dec.min;
+    return
   end
   if isnumeric(dec)
     if isscalar(dec)
@@ -1044,9 +1128,13 @@ function h = image_build(tag, ip, ud, self)
   m = uimenu(h, 'Label', 'View');
   uimenu(m, 'Label', 'Update view','Callback', @MenuCallback, ...
     'Accelerator','u');
-  src=uimenu(m, 'Label', 'Auto Update View', ...
-    'Callback', @MenuCallback, 'Checked','on','UserData',self);
-  t = uimenu(m, 'Label', 'Open SkyChart', 'Callback', @MenuCallback, ...
+  if self.autoscreen, n='on'; else n='off'; end
+  uimenu(m, 'Label', 'Auto Update View', ...
+    'Callback', @MenuCallback, 'Checked',n,'UserData',self);
+  if self.autoreverse, n='on'; else n='off'; end
+  uimenu(m, 'Label', 'Auto Mount Reversal', ...
+    'Callback', @MenuCallback, 'Checked',n,'UserData',self);
+  t=uimenu(m, 'Label', 'Open SkyChart', 'Callback', @MenuCallback, ...
     'Separator','on');
   if ~exist('skychart'), set(t, 'Enable','off'); end
   uimenu(m, 'Label', 'Open <Sky-Map.org>', 'Callback', @MenuCallback);
@@ -1168,6 +1256,8 @@ function ButtonDownCallback(src, evnt)
               'A Matlab interface to control a Vixen StarBook SX mount', ...
               getstatus(sb), ...
               [ 'Motor coders XY=' num2str([sb.x sb.y]) ], ...
+              [ 'Sideral rate=   ' num2str(sb.rate_ra) ], ...
+              [ 'Time wrt Meridian= ' num2str(sb.delta_ra)  ' [min]' ], ...
               [ 'http://' sb.ip ], ...
               '(c) E. Farhi GPL2 2018 <https://github.com/farhi/matlab-starbook>' };
     if ~isempty(im)
@@ -1224,22 +1314,22 @@ function MenuCallback(src, evnt)
   end
   
   switch lower(strtok(lab))
-  case 'auto'
+  case {'auto','mount'} % Auto Update menu item
     % get the state
     checked = get(src, 'Checked');
     % get the timer
     s = get(src,'UserData');
-    if isempty(s)
-      return
-    end
-    if strcmp(checked,'off')
-      % check and start timer
-      set(src, 'Checked','on');
-      if strcmp(s.timer.Running,'off') start(s.timer); end
+    if isempty(s), return; end
+    
+    % set new state (toggle)
+    if strcmp(checked,'off'), n='on'; else n='off'; end
+    if ~isempty(strfind(lower(lab), 'view'))
+      s.autoscreen   = strcmp(n, 'on');
     else
-      set(src, 'Checked','off');
-      if strcmp(s.timer.Running,'on') stop(s.timer); end
+      s.autoreverse = strcmp(n, 'on');
     end
+    set(src, 'Checked',n);
+    if strcmp(s.timer.Running,'off') start(s.timer); end
   otherwise
     feval(@ButtonDownCallback, gcbf, lab);
   end
@@ -1261,7 +1351,12 @@ end % ScrollWheelCallback
 function TimerCallback(src, evnt)
   % TimerCallback: update view from timer event
   sb = get(src, 'UserData');
-  if isvalid(sb), sb.update; 
+  if isvalid(sb), 
+    try
+      sb.update;
+    catch ME
+      getReport(ME)
+    end
   else delete(src); end
 end % TimerCallback
 

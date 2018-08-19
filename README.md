@@ -16,7 +16,7 @@ This way you can fully control, and plan the sky observations from your sofa, wh
 Usage
 -----
 
-The mount should have been aligned and configured (date, location, weighting) before. For the alignment, it is recommended to use at least 4 stars, possibly up to 9. For the polar alignment, use Stellarium to visually check the location of the polar star wrt the North pole. Suppose in the view you see the polar star at 10 o'clock. Then turn the graticule so that the space for the polar star is at the opposite location as that of Stellarium (the polar scopes invert images). This would then be the 4 o'clock location for our example. Finally adjust the knobs to place the polar star at its theoretical location.
+The StarBook IP should be read accessing the 'About STAR BOOK' item, e.g. displayed in the menu at start-up or accessed with the 'MENU' key. 
 
 Then use e.g.:
 
@@ -33,6 +33,14 @@ You can access more actions from the top menu.
 ![Screen of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/screen_valid.png)
 
 You may close this view, and re-open it anytime, without affecting the StarBook itself. If the StarBook image can not be retrieved (e.g with a StarBook S and StarBook Ten), a static image is used, and buttons are active as RA+/RA-/DEC+/DEC- (arrows on the right) and ZOOM+/ZOOM- (up/down arrows on the left).
+
+**Preliminary alignment of the Mount**
+
+The mount should have been aligned and configured (date, location, weighting) before.
+
+For the polar alignment, use Stellarium to visually check the location of the polar star wrt the North pole. Suppose in the view you see the polar star at 10 o'clock. Then turn the graticule so that the space for the polar star is at the opposite location as that of Stellarium (the polar scopes invert images). This would then be the 4 o'clock location for our example. Finally adjust the knobs to place the polar star at its theoretical location.
+
+For the alignment, it is recommended to use at least 4 stars, possibly up to 9. Choose a few stars or planets (4-9) on the same side on the meridian (e.g. east or west), preferably not at the zenith. Send the scope there and center the image for each.
 
 Progamming the StarBook
 -----------------------
@@ -101,18 +109,13 @@ You may as well request to wait for the mount to end movement with:
 A typical programming for a night could be, after the mount alignment:
 ```matlab
 addpath('/path/to/matlab-starbook')
-diary on % to record the night session
-disp([ datestr(now) ': Starting' ])
 sb=starbook('192.168.1.19');
 for target={'M 51','M 81','M 101'}
-  disp([ datestr(now) ': Pointing towards ' target{1} ])
   sb.gotoradec(target{1});
   waitfor(sb);
-  disp([ datestr(now) ' ' sb.getstatus ])
   imwrite(sb.getscreen, [ 'starbook_' datestr(now, 30) '.png' ])
   pause(1800)
 end
-disp([ datestr(now) ': Ending' ])
 home(sb); % back to safe position, to avoid dew on the mirror
 ```
 Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you to plan your observations using Stellarium (http://stellarium.org/) and http://sky-map.org
@@ -131,7 +134,7 @@ for target=sb.grid('M 51');
 end
 ```
 
-**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a **'Telescope will now reverse'** message. To avoid this, make sure you choose targets which do not pass the meridian (i.e. remain either on the East or West side). You may as well reposition every 30 min to allow programmatic reversal. Before launching an automatic sequence, make sure the scope can not collide with anything around (mount, pillar, cable...). 
+**WARNING** if the mount has to reverse, you may loose the computer remote control, and would then need to select physically the Yes/No buttons on the StarBook. The mount status will then be USER, and the StarBook screen shows a **'Telescope will now reverse'** message. To avoid that, check **Auto Mount Reversal** menu item in the View menu. Before launching an automatic sequence, make sure the scope can not collide with anything around (mount, pillar, cable...). 
 
 Methods
 -------
@@ -147,6 +150,7 @@ Methods
 - **home(sb)**:       send the SB to its HOME position
 - **help(sb)**:       open the Help page
 - **grid**:           build a grid around target
+- **waitfor(sb)**:    wait for the mount to stop moving
 
 Other minor commands
 
@@ -163,7 +167,7 @@ Other minor commands
 - **date(sb)**:       get the starbook date/time
 - **chart(sb)**:      open skychart (when available)
 - **findobj(sb,obj)**: search for an object name in star/DSO catalogs
-- **waitfor(sb)**:    wait for the mount to stop moving
+- **revert(sb)**:     attempt a mount reversal. Must be close within 5 min.
 
 Requirements/Installation
 -------------------------

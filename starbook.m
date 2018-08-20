@@ -1245,7 +1245,8 @@ function ButtonDownCallback(src, evnt)
     sb.getstatus;
     chart(sb);
   case 'update'
-    sb.update;
+    disp([ mfilename ': [' datestr(now) ']: ' sb.getstatus ]);
+    sb.image;
   case {'about','about starbook'}
     try
       im = imread(fullfile(fileparts(which(mfilename)),'doc','Starbook.jpg'));

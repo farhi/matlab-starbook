@@ -1244,7 +1244,7 @@ function ButtonDownCallback(src, evnt)
   case {'chart','open skychart'}
     sb.getstatus;
     chart(sb);
-  case 'update'
+  case {'update','update view'}
     disp([ mfilename ': [' datestr(now) ']: ' sb.getstatus ]);
     sb.image;
   case {'about','about starbook'}
@@ -1281,6 +1281,8 @@ function ButtonDownCallback(src, evnt)
     sb.help;
   case 'close'
     close(sb);
+  otherwise
+    disp([ mfilename ': unknown action ' lab ]);
   end
 end % ButtonDownCallback
 

@@ -934,6 +934,45 @@ classdef starbook < handle
       if nargin < 3, output = ''; end
       [val, str] = queue(self.ip, input, output);
     end % queue
+    
+    function disp(self)
+      % disp(s) : display StarBook object (details)
+      
+      if ~isempty(inputname(1))
+        iname = inputname(1);
+      else
+        iname = 'ans';
+      end
+      if isdeployed || ~usejava('jvm') || ~usejava('desktop') || nargin > 2, id=class(self);
+      else id=[  '<a href="matlab:doc ' class(self) '">' class(self) '</a> ' ...
+                 '(<a href="matlab:methods ' class(self) '">methods</a>,' ...
+                 '<a href="matlab:image(' iname ');">plot</a>)'  ];
+      end
+      self.getstatus;
+      fprintf(1,'%s = %s %s [%s]\n',iname, id, self.state, self.ip);
+      fprintf(1,'  RA:  %d+%.2f\n', self.ra.h, self.ra.min);
+      fprintf(1,'  DEC: %d+%.2f\n', self.dec.deg, self.dec.min);
+    
+    end % disp
+    
+    function display(self)
+      % display(s) : display Astrometry object (short)
+      
+      if ~isempty(inputname(1))
+        iname = inputname(1);
+      else
+        iname = 'ans';
+      end
+      if isdeployed || ~usejava('jvm') || ~usejava('desktop') || nargin > 2, id=class(self);
+      else id=[  '<a href="matlab:doc ' class(self) '">' class(self) '</a> ' ...
+                 '(<a href="matlab:methods ' class(self) '">methods</a>,' ...
+                 '<a href="matlab:image(' iname ');">plot</a>,' ...
+                 '<a href="matlab:disp(' iname ');">more...</a>)' ];
+      end
+      radec = sprintf('RA=%d+%.2f DEC=%d+%.2f', ...
+          self.ra.h, self.ra.min, self.dec.deg, self.dec.min);
+      fprintf(1,'%s = %s %s\n',iname, id, radec);
+    end % display
   
   end % methods
   

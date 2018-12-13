@@ -596,6 +596,7 @@ classdef starbook < handle
         % must do a round in 24h
         % we display a message when moving slower than 1/2 the speed
         if self.rate_ra < 0.5
+          beep
           disp([ mfilename ': [' datestr(now) ']: WARNING: SLOW RA move' ])
           disp([ '    rate=' num2str(self.rate_ra) ' [sideral] delta=' num2str(delta_ra*1800) ' [min wrt meridian] ' s ])
           disp('    Check cables and tube. RA (X) is stuck ?' );

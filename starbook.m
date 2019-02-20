@@ -546,7 +546,8 @@ classdef starbook < handle
       
       % on RA, x can reach +/- round/4 as a 1/4th round
       delta_ra = (double(self.round/4) - abs(double(self.x)))/double(self.round);
-      if delta_ra*100 <= -0.25
+      if delta_ra*100 <= -0.2
+        beep
         disp([ mfilename ': [' datestr(now) ']: mount is close to revert on X (east-west=RA) motor. ' ])
         disp([ '    Delta=' num2str(delta_ra*100) ' % i.e. ' ...
                num2str(abs(delta_ra)*1800) ' min after meridian.' ])
@@ -951,8 +952,9 @@ classdef starbook < handle
       end
       self.getstatus;
       fprintf(1,'%s = %s %s [%s]\n',iname, id, self.state, self.ip);
-      fprintf(1,'  RA:  %d+%.2f\n', self.ra.h, self.ra.min);
-      fprintf(1,'  DEC: %d+%.2f\n', self.dec.deg, self.dec.min);
+      fprintf(1,'  RA:  %d+%.2f [h:min]\n', self.ra.h, self.ra.min);
+      fprintf(1,'  DEC: %d+%.2f [deg:min]\n', self.dec.deg, self.dec.min);
+      fprintf(1,'  dX:  %f [min] time to meridian\n',self.delta_ra);
     
     end % disp
     

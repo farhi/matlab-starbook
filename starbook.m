@@ -134,6 +134,8 @@ classdef starbook < handle
     rate_ra   = 0;
     delta_ra  = 0;
     autoreverse=true;
+    ra_astrometry =[];
+    dec_astrometry=[];
     
   end % properties
   
@@ -149,6 +151,9 @@ classdef starbook < handle
     y_goto    = [];
     t_goto    = [];
     autoscreen= true;
+    executables = []; % for solve-plate annotation (astrometry)
+    process_java = [];
+    process_dir  = [];
   end % properties
   
   methods
@@ -959,7 +964,7 @@ classdef starbook < handle
     end % disp
     
     function display(self)
-      % display(s) : display Astrometry object (short)
+      % display(s) : display StarBook object (short)
       
       if ~isempty(inputname(1))
         iname = inputname(1);
@@ -976,6 +981,54 @@ classdef starbook < handle
           self.ra.h, self.ra.min, self.dec.deg, self.dec.min);
       fprintf(1,'%s = %s %s\n',iname, id, radec);
     end % display
+    
+    function annotate(self, filename)
+      % annotate: solve-plate an image (e.g. from a camera) in the background
+      % report when annotation has ended
+      
+      if isempty(self.executables)
+        self.executables = find_executables;
+      end
+
+      if isempty(self.executables.solve_field), return; end % not available
+      if ~isempty(self.process_java), return; end           % already running
+      
+      % get current mount location in [deg]
+      ra = self.ra;   % struct: h   min
+      dec= self.dec;  % struct: deg min
+      % convert to [deg]
+      ra_sb_deg = (ra.h+ra.min/60)*15;
+      dec_sb_deg= dec.deg+dec.min/60;
+      
+      % build 'astrometry' command (requires 'astrometry.net' local installation)
+      if isempty(self.process_dir)
+        d = tempname;
+        if ~isdir(d), mkdir(d); end
+        self.process_dir = d;
+      else d=self.process_dir;
+      end
+      
+      cmd = [ self.executables.solve_field  ];
+      cmd = [ cmd  ' '           filename ];
+      if ~isempty(self.executables.sextractor)
+        % highly improves annotation efficiency
+        cmd = [ cmd ' --use-sextractor' ];
+      end
+      cmd = [ cmd ' --dir '      d ];
+      cmd = [ cmd ' --new-fits ' fullfile(d, 'results.fits') ];
+      cmd = [ cmd ' --rdls '     fullfile(d, 'results.rdls') ];
+      cmd = [ cmd ' --corr '     fullfile(d, 'results.corr') ' --tag-all' ];
+      cmd = [ cmd ' --wcs='      fullfile(d, 'results.wcs') ];
+      % use mount location as guess (much faster to solve)
+      cmd = [ cmd ' --ra=' num2str(ra_sb_deg) ])
+      cmd = [ cmd ' --dec=' num2str(dec_sb_deg) ])
+      cmd = [ cmd ' --scale-low=0.5 --scale-high=2 '  ]; % field of view VMC200L
+      disp([ mfilename ': [' datestr(now) ']: ' cmd ]);
+      
+      % launch a Java asynchronous command
+      self.process_java = java.lang.Runtime.getRuntime().exec(cmd);
+      
+    end % annotate
   
   end % methods
   
@@ -1403,15 +1456,122 @@ end % ScrollWheelCallback
 
 
 function TimerCallback(src, evnt)
-  % TimerCallback: update view from timer event
+  % TimerCallback: update status/view from timer event
   sb = get(src, 'UserData');
   if isvalid(sb), 
     try
-      sb.update;
+      sb.update; % getstatus
+      
+      % check if any astrometry job is running
+      if ~isempty(sb.process_java) && isjava(sb.process_java)
+        try
+          exitValue = sb.process_java.exitValue; % will raise error if process still runs
+          active  = 0;
+        catch ME
+          % still running
+          if isempty(sb.process_java) || ~isjava(sb.process_java)
+            active  = 0;
+          else
+            active  = 1;
+          end
+        end
+        % not active anymore: process has ended.
+        if ~active
+          disp([ mfilename ': [' datestr(now) ']: annotation ended.' ]);
+          disp([ mfilename ': astrometry: results in ' sb.process_dir ])
+          sb.process_java = [];
+          d = sb.process_dir;
+          % get results (center of field)
+          for file={'results.wcs','wcs.fits'}
+            if exist(fullfile(d, file{1}), 'file')
+              wcs  = read_fits(fullfile(d, file{1}));
+              
+              % get image center and print it
+              if isfield(wcs,'meta') && isfield(wcs.meta,'CRVAL1')
+                wcs = wcs.meta
+                wcs.CD = [ wcs.CD1_1 wcs.CD1_2 ; 
+                           wcs.CD2_1 wcs.CD2_2 ];
+                                    
+                % get central coordinates
+                sz  = [ wcs.IMAGEW wcs.IMAGEH ]/2;
+
+                [RA, Dec] = xy2sky_tan(wcs, sz(1), sz(2)); % MAAT Ofek (private)
+                RA=RA*180/pi; Dec=Dec*180/pi; % in [deg]
+                disp([ mfilename ': astrometry: center RA=' num2str(RA) ' Dec=' num2str(Dec) ])
+                rmdir(d,'s');
+                mkdir(d);
+                % get current mount coordinates in [deg]
+                
+                % get new coordinates in [deg]
+                
+                % convert to h:m and deg:m
+                
+                % goto there
+                
+              end % isfield CRVAL1
+            end % exist fits file
+          end % for file
+          
+        end
+      end
     catch ME
       getReport(ME)
     end
+    
   else delete(src); end
+  
 end % TimerCallback
 
+function executables = find_executables
+  % find_executables: locate astrometry executables, return a structure
+  
+  % stored here so that they are not searched for further calls
+  persistent found_executables
+  
+  if ~isempty(found_executables)
+    executables = found_executables;
+    return
+  end
+  
+  if ismac,      precmd = 'DYLD_LIBRARY_PATH= ;';
+  elseif isunix, precmd = 'LD_LIBRARY_PATH= ; '; 
+  else           precmd=''; end
+  
+  if ispc, ext='.exe'; else ext=''; end
+  
+  executables = [];
+  this_path   = fullfile(fileparts(which(mfilename)));
+  
+  % what we may use
+  for exe =  { 'solve-field','sextractor' }
+  
+    for try_target={ ...
+      fullfile(this_path, [ exe{1} ext ]), ...
+      fullfile(this_path, [ exe{1} ]), ...
+      [ exe{1} ext ], ... 
+      exe{1} }
+      
+      if exist(try_target{1}, 'file')
+        status = 0; result = 'OK';
+      else
+        [status, result] = system([ precmd try_target{1} ' --version' ]); % run from Matlab
+      end
+      
+      name = strrep(exe{1}, '-','_');
+      name = strrep(name  , '.','_');
 
+      if status ~= 127
+        % the executable is found
+        executables.(name) = try_target{1};
+        disp([ mfilename ': found ' exe{1} ' as ' try_target{1} ])
+        break
+      else
+        executables.(name) = [];
+      end
+    end
+  
+  end
+  
+  found_executables = executables;
+  
+end % find_executables

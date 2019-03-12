@@ -1020,8 +1020,8 @@ classdef starbook < handle
       cmd = [ cmd ' --corr '     fullfile(d, 'results.corr') ' --tag-all' ];
       cmd = [ cmd ' --wcs='      fullfile(d, 'results.wcs') ];
       % use mount location as guess (much faster to solve)
-      cmd = [ cmd ' --ra=' num2str(ra_sb_deg) ])
-      cmd = [ cmd ' --dec=' num2str(dec_sb_deg) ])
+      cmd = [ cmd ' --ra=' num2str(ra_sb_deg) ]
+      cmd = [ cmd ' --dec=' num2str(dec_sb_deg) ]
       cmd = [ cmd ' --scale-low=0.5 --scale-high=2 '  ]; % field of view VMC200L
       disp([ mfilename ': [' datestr(now) ']: ' cmd ]);
       

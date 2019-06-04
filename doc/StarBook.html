@@ -20,7 +20,7 @@
       -webkit-text-stroke-width: 0px; text-decoration-style: initial;
       text-decoration-color: initial;" align="center">matlab-starbook</h1>
     <div align="center">Control a Vixen SX mount StarBook from Matlab<br>
-      <i>Version 18.04.15 - (c) E. Farhi.</i><br>
+      <i>Version 19.06.02 - (c) E. Farhi.</i><br>
     </div>
     <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
       16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
@@ -72,6 +72,7 @@
 
 
 
+
       this is a Matlab class to control the Vixen <a
         href="https://www.vixenoptics.co.uk/Pages/star_book.htm">StarBook</a>
       for telescope mounts. Compatibility with the <a
@@ -89,8 +90,10 @@
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -122,6 +125,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">This
+
 
 
 
@@ -207,6 +211,7 @@
 
 
 
+
       use e.g.:</p>
     <div class="highlight highlight-source-matlab" style="box-sizing:
       border-box; margin-bottom: 16px; color: rgb(36, 41, 46);
@@ -246,6 +251,7 @@
 
 
 
+
       establish the connection and display the StarBook screen. When the
       IP is not given, a dialogue shows up.
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -262,6 +268,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">The
+
 
 
 
@@ -321,8 +328,10 @@
 
 
 
+
         S</a> and <a
         href="https://www.vixenoptics.co.uk/Pages/star_book_ten.html">StarBook
+
 
 
 
@@ -351,6 +360,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><b>Preliminary
+
         alignment of the Mount</b><br>
     </p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
@@ -364,6 +374,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">The
+
 
 
 
@@ -391,6 +402,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">For
+
       the polar alignment, use Stellarium to visually check the location
       of the polar star wrt the North pole. Suppose in the view you see
       the polar star at 10 o'clock. Then turn the graticule so that the
@@ -410,6 +422,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">For
+
       the alignment, it is recommended to use at least 4 stars, possibly
       up to 9. Choose a few stars or planets (4-9) on the same side on
       the meridian (e.g. east or west), preferably not at the zenith.
@@ -458,6 +471,7 @@
 
 
 
+
       the StarBook</h2>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -486,6 +500,7 @@
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">You
+
 
 
 
@@ -536,7 +551,7 @@
     </ul>
     The named objects have the syntax 'Catalog ID', where the <b>space</b>
     in between is <b>mandatory.</b> So, use 'M 51', <i>not</i> 'M51'.
-    The available catalogues are those given with <a
+    The available catalogs are those given with <a
       href="https://github.com/farhi/matlab-skychart">SkyChart</a> (<a
       href="https://github.com/farhi/matlab-skychart">https://github.com/farhi/matlab-skychart</a>),
 
@@ -545,7 +560,8 @@
 
 
 
-    but SkyChart is not required as the catalogues are now included in
+
+    but SkyChart is not required as the catalogs are included in
     StarBook.<br>
     <br>
     To check if the mount has reached its position, use:<br>
@@ -662,7 +678,9 @@ sb=starbook(<span class="pl-s" style="box-sizing: border-box; color: rgb(3, 47, 
         meridian (i.e. remain either on the East or West side). You may
         as well reposition every 30 min to allow programmatic reversal.
         Before launching an automatic sequence, make sure the scope can
-        not collide with anything around (mount, pillar, cable...).</font></font><br>
+        not collide with anything around (mount, pillar, cable...).</font></font>
+    The 'auto reverse' option allows to check when the mount is close to
+    reversal, and trigger a reversal without stalling the mount.<br>
     <h2 style="box-sizing: border-box; margin-top: 24px; margin-bottom:
       16px; font-size: 1.5em; font-weight: 600; line-height: 1.25;
       padding-bottom: 0.3em; border-bottom: 1px solid rgb(234, 236,
@@ -757,9 +775,11 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
           ra, dec)</strong>: send StarBook to RA/DEC (given in HH:MM and
         Deg:MM). When the RA/DEC are not given, a dialogue is shown.</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>gotoradec(sb,
+
 
 
 
@@ -822,6 +842,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
       minor commands</p>
     <ul style="box-sizing: border-box; padding-left: 2em; margin-top:
       0px; margin-bottom: 16px; color: rgb(36, 41, 46); font-family:
@@ -869,22 +890,10 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
         get/set the zoom level. z can be 'in','out' or in 0-8</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><b>date(sb):</b>
         get the StarBook date/time</li>
-      <li style="box-sizing: border-box; margin-top: 0.25em;"><b>chart(sb)</b>:&nbsp;
-
-
-
-
-
-
-
-
-
-        open <a
-href="https://fr.mathworks.com/matlabcentral/fileexchange/66036-skychart">skychart</a>
-        (when available)</li>
       <li style="box-sizing: border-box; margin-top: 0.25em;"><strong
           style="box-sizing: border-box; font-weight: 600;">findobj(sb,obj)</strong>:
         search for an object name in star/DSO catalogs</li>
@@ -982,6 +991,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
       copy the files. Then type commands above.</p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
       16px; color: rgb(36, 41, 46); font-family: -apple-system,
@@ -995,6 +1005,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><b>Limitations:</b>
       The <a href="https://www.vixenoptics.co.uk/Pages/star_book_s.htm">StarBook
+
 
 
 
@@ -1023,6 +1034,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
 
 
 
+
         Ten</a> may be partly supported (the screen image is not
       handled).</p>
     <p style="box-sizing: border-box; margin-top: 0px; margin-bottom:
@@ -1036,6 +1048,7 @@ href="https://github.com/farhi/matlab-starbook#requirementsinstallation"
       text-transform: none; white-space: normal; widows: 2;
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;">We
+
 
 
 
@@ -1123,6 +1136,7 @@ href="https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload"
       word-spacing: 0px; -webkit-text-stroke-width: 0px;
       text-decoration-style: initial; text-decoration-color: initial;"><strong
         style="box-sizing: border-box; font-weight: 600;">rubytelescopeserver:
+
 
 
 

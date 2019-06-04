@@ -102,7 +102,6 @@ classdef starbook < handle
   %   web(sb)        show the current target on sky-map.org
   %   zoom(sb,{z})   get/set the zoom level. z can be 'in','out' or in 0-8
   %   date(sb)       get the starbook date/time
-  %   connect(sb,obj) attach a SonyAlpha or SkyChart object
   %   findobj(sb,obj) search for an object name in star/DSO catalogs
   %   reset(sb)      hibernate the mount. Use start(sb) to restart.
   %   queue(sb, cmd)  send a command
@@ -115,7 +114,7 @@ classdef starbook < handle
   % rubytelescopeserver: Rob Burrowes 2013
   %   https://github.com/rbur004/rubytelescopeserver
   %
-  % (c) E. Farhi, GPL2 - version 18.02.03
+  % (c) E. Farhi, GPL2 - version 19.06.02
 
   properties
     ip        = '169.254.1.1';  % default IP as set in StarBook
@@ -146,16 +145,12 @@ classdef starbook < handle
     simulate  = false;
     revert_flag= false;   % true during an auto reverse action
     figure    = [];
-    skychart  = [];
     catalogs  = [];
     x_goto    = [];
     y_goto    = [];
     t_goto    = [];
     autoscreen= true;
-    executables = []; % for solve-plate annotation (astrometry)
-    process_java = [];
-    process_dir  = [];
-    camera    = [];   % hold a camera object after 'connect'. The camera must have an 'image' method
+
   end % properties
   
   methods
@@ -184,9 +179,12 @@ classdef starbook < handle
       % check if IP address is reachable
       ip = java.net.InetAddress.getByName(char(sb.ip));
       if ~ip.isReachable(1000)
+        disp([ mfilename ': WARNING: can not connect to ' sb.ip '. Using simulate mode.' ])  
         sb.simulate=true;
+      else
+        disp([ mfilename ': Connecting to ' sb.ip ])
       end
-      disp([ mfilename ': Connecting to ' sb.ip ])
+      
       if ~sb.simulate
         try
           ret = queue(sb.ip, 'getversion', 'version=%s');
@@ -790,20 +788,6 @@ classdef starbook < handle
       open_system_browser(url);
     end
     
-    function connect(self, obj)
-      % CONNECT connect a Camera or a SkyChart to the StarBook
-      %   CONNECT(sb, sonyalpha) allow time-lapse and auto-center
-      %   CONNECT(sb, skychart)  allow goto from a SkyChart
-      if nargin < 2 || isempty(obj), return; end
-      if isa(obj, 'skychart')
-        sel.skychart = obj;
-        % associate the starbook to the chart (connect it)
-        connect(self.skychart, self);
-        plot(self.skychart);
-      else return; end
-      disp([ mfilename ': connected ' class(obj) ])
-    end % camera
-    
     function close(self)
       % CLOSE close the starbook view
       if ishandle(self.figure); delete(self.figure); end
@@ -982,6 +966,9 @@ classdef starbook < handle
       fprintf(1,'  DEC: %d+%.2f [deg:min] (%f DEG)\n', self.dec.deg, self.dec.min, ...
         (self.dec.deg+self.dec.min/60));
       fprintf(1,'  dX:  %f [min] time to meridian\n',self.delta_ra);
+      if ~isempty(self.target_name)
+        fprintf(1,'  Last target:  %s\n', self.target_name);
+      end
     
     end % disp
     
@@ -1212,9 +1199,6 @@ function h = image_build(tag, ip, ud, self)
   if self.autoreverse, n='on'; else n='off'; end
   uimenu(m, 'Label', 'Auto Mount Reversal', ...
     'Callback', @MenuCallback, 'Checked',n,'UserData',self);
-  t=uimenu(m, 'Label', 'Open SkyChart', 'Callback', @MenuCallback, ...
-    'Separator','on');
-  if ~exist('skychart'), set(t, 'Enable','off'); end
   uimenu(m, 'Label', 'Open <Sky-Map.org>', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'Open Location (GPS) on <Google Maps>', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'Help', 'Callback', @MenuCallback);
@@ -1319,9 +1303,6 @@ function ButtonDownCallback(src, evnt)
     sb.move(0,0,1,0);
   case 'ra-'
     sb.move(0,0,0,1);
-  case {'chart','open skychart'}
-    sb.getstatus;
-    chart(sb);
   case {'update','update view'}
     disp([ mfilename ': [' datestr(now) ']: ' sb.getstatus ]);
     sb.image;
@@ -1443,56 +1424,3 @@ function TimerCallback(src, evnt)
   
 end % TimerCallback
 
-function executables = find_executables
-  % find_executables: locate astrometry executables, return a structure
-  
-  % stored here so that they are not searched for further calls
-  persistent found_executables
-  
-  if ~isempty(found_executables)
-    executables = found_executables;
-    return
-  end
-  
-  if ismac,      precmd = 'DYLD_LIBRARY_PATH= ;';
-  elseif isunix, precmd = 'LD_LIBRARY_PATH= ; '; 
-  else           precmd=''; end
-  
-  if ispc, ext='.exe'; else ext=''; end
-  
-  executables = [];
-  this_path   = fullfile(fileparts(which(mfilename)));
-  
-  % what we may use
-  for exe =  { 'solve-field','sextractor' }
-  
-    for try_target={ ...
-      fullfile(this_path, [ exe{1} ext ]), ...
-      fullfile(this_path, [ exe{1} ]), ...
-      [ exe{1} ext ], ... 
-      exe{1} }
-      
-      if exist(try_target{1}, 'file')
-        status = 0; result = 'OK';
-      else
-        [status, result] = system([ precmd try_target{1} ' --version' ]); % run from Matlab
-      end
-      
-      name = strrep(exe{1}, '-','_');
-      name = strrep(name  , '.','_');
-
-      if status ~= 127
-        % the executable is found
-        executables.(name) = try_target{1};
-        disp([ mfilename ': found ' exe{1} ' as ' try_target{1} ])
-        break
-      else
-        executables.(name) = [];
-      end
-    end
-  
-  end
-  
-  found_executables = executables;
-  
-end % find_executables

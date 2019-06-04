@@ -70,6 +70,11 @@ classdef starbook < handle
   % 
   %  >> waitfor(sb)
   %
+  % It is also possible to monitor when the mount has reached a new target with
+  % the 'gotoReached' event:
+  %   sb = starbook(''192.168.1.19')
+  %   addlistener(sb, 'gotoReached', @(src,evt)disp('goto reached'))
+  %
   % WARNING: if the mount has to reverse, you may loose the computer remote control, 
   % and would then need to select physically the Yes/No buttons on the StarBook.
   % The mount status should then be USER. To avoid that, check Auto Mount Reversal
@@ -152,6 +157,10 @@ classdef starbook < handle
     autoscreen= true;
 
   end % properties
+  
+  events
+    gotoReached
+  end
   
   methods
   
@@ -257,6 +266,7 @@ classdef starbook < handle
       %       In a menu  => USER
       
       % called in: update (TimerCallback), web, waitfor
+      prev_state = self.state;
       if ~self.simulate
         ret = queue(self.ip, 'getstatus', ...
           'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
@@ -286,6 +296,9 @@ classdef starbook < handle
       self.state   = char(ret{6});
       if goto
         self.state = 'GOTO';
+      end
+      if strcmp(prev_state,'GOTO') && strcmp(self.state,'SCOP')
+        notify(self,'gotoReached')
       end
       [coders, rev] = getxy(self);  % update coder values
       s = sprintf('RA=%d+%f DEC=%d+%f [%s] %s', ...

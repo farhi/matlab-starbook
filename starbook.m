@@ -1,5 +1,5 @@
 classdef starbook < handle
-  % STARBOOK: a class to control the Vixen StarBook for telescope mounts.
+  % STARBOOK a class to control the Vixen StarBook for telescope mounts.
   %   StarBook, StarBook S and StarBook Ten are supported, to control 
   %   SX, SX2, SXD2, SXP, SXW, SXD and AXD mounts.
   %
@@ -66,7 +66,7 @@ classdef starbook < handle
   %  - INIT: not ready yet
   %  - CHART: in Chart mode
   %
-  % You may as well request to wait for the mount to wait for movement completion with:
+  % You may as well request for the mount to wait the current movement completion with:
   % 
   %  >> waitfor(sb)
   %
@@ -77,39 +77,39 @@ classdef starbook < handle
   % scope can not collide with anything around (mount, pillar, cable...). 
   %
   % Methods:
-  %   starbook(ip):   connect to a StarBook controller
-  %   gotoradec(sb, ra, dec): send StarBook to RA/DEC  (given in HH:MM and Deg:MM)
-  %   gotoradec(sb, 'M 51'):  send to named object
-  %   move(sb, n,s,e,w): move the SB in given direction. Use stop to abort.   
-  %   align(sb):      align current coordinates to RA/DEC target     
-  %   stop(sb):       stop the mount (e.g. during move/gotoradec)
-  %   setspeed(sb):   set the current zoom/mount speed 0:stop - 8:fast
-  %   image(sb):      display the StarBook image (only for 320*240 screen)
-  %   home(sb):       send the SB to its HOME position
-  %   help(sb):       open the Help page
-  %   grid(sb):       build a grid around the target. Goto to items with gotoradec.
+  %   starbook(ip)   connect to a StarBook controller
+  %   gotoradec(sb, ra, dec) send StarBook to RA/DEC  (given in HH:MM and Deg:MM)
+  %   gotoradec(sb, 'M 51')  send to named object
+  %   move(sb, n,s,e,w) move the SB in given direction. Use stop to abort.   
+  %   align(sb)      align current coordinates to RA/DEC target     
+  %   stop(sb)       stop the mount (e.g. during move/gotoradec)
+  %   setspeed(sb)   set the current zoom/mount speed 0:stop - 8:fast
+  %   image(sb)      display the StarBook image (only for 320*240 screen)
+  %   home(sb)       send the SB to its HOME position
+  %   help(sb)       open the Help page
+  %   grid(sb)       build a grid around the target. Goto to items with gotoradec.
   %   waitfor(sb)     wait for the mount to stop moving
   %
   % Other minor commands
-  %   start(sb):      set/reset the StarBook in SCOPE mode
-  %   getspeed(sb):   return the current zoom/mount speed 
-  %   getstatus(sb):  update the StarBook state
-  %   getxy(sb):      update motor coders     
-  %   getscreen(sb):  get the StarBook image as an RGB matrix
-  %   update(sb):     update status and image
-  %   plot(sb):       same as image(sb)
-  %   close(sb):      close the screen view
-  %   web(sb):        show the current target on sky-map.org
-  %   zoom(sb,{z}):   get/set the zoom level. z can be 'in','out' or in 0-8
-  %   date(sb):       get the starbook date/time
-  %   chart(sb):      open skychart (when available)
+  %   start(sb)      set/reset the StarBook in SCOPE mode
+  %   getspeed(sb)   return the current zoom/mount speed 
+  %   getstatus(sb)  update the StarBook state
+  %   getxy(sb)      update motor coders     
+  %   getscreen(sb)  get the StarBook image as an RGB matrix
+  %   update(sb)     update status and image
+  %   plot(sb)       same as image(sb)
+  %   close(sb)      close the screen view
+  %   web(sb)        show the current target on sky-map.org
+  %   zoom(sb,{z})   get/set the zoom level. z can be 'in','out' or in 0-8
+  %   date(sb)       get the starbook date/time
+  %   connect(sb,obj) attach a SonyAlpha or SkyChart object
   %   findobj(sb,obj) search for an object name in star/DSO catalogs
-  %   reset(sb):      hibernate the mount. Use start(sb) to restart.
+  %   reset(sb)      hibernate the mount. Use start(sb) to restart.
   %   queue(sb, cmd)  send a command
   %   revert(sb)      attempt a mount reversal. Must be close within 5 min.
   %
   % Credits: 
-  % urldownload : version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016
+  % urldownload: version 1.0 (9.81 KB) by Jaroslaw Tuszynski, 23 Feb 2016
   %   https://fr.mathworks.com/matlabcentral/fileexchange/55614-urldownload
   % 
   % rubytelescopeserver: Rob Burrowes 2013
@@ -121,13 +121,14 @@ classdef starbook < handle
     ip        = '169.254.1.1';  % default IP as set in StarBook
     target_ra = struct('h',  0,'min',0);       % target RA/DEC, as struct(h/deg,min)
     target_dec= struct('deg',0,'min',0);
+    target_name=[];
     ra        = struct('h',  0,'min',0);       % current RA/DEC, as struct(h/deg,min)
     dec       = struct('deg',0,'min',0);
     state     = 'INIT';
     x         = 0;        % coder values (0:round)
     y         = 0;
     round     = 8640000;  % full circle coder value
-    speed     = 8;
+    speed     = 6;
     version   = '2.7 (simulate)';
     place     = { 'E' 5 2 'N' 45 2 0 };       % GPS location and hour shift/UTC
     UserData  = [];
@@ -154,12 +155,14 @@ classdef starbook < handle
     executables = []; % for solve-plate annotation (astrometry)
     process_java = [];
     process_dir  = [];
+    camera    = [];   % hold a camera object after 'connect'. The camera must have an 'image' method
   end % properties
   
   methods
   
     function sb = starbook(ip)
-      % sb=starbook(ip): start communication an given IP and initialize the StarBook
+      % STARBOOK start communication an given IP and initialize the StarBook
+      %   sb=STARBOOK(ip) specify an IP, e.g. 169.254.1.1 192.168.1.19 ...
       if nargin
         if strncmp(ip, 'sim',3)
           sb.simulate   = true;
@@ -177,6 +180,11 @@ classdef starbook < handle
         elseif strncmp(answer{1}, 'sim',3)
           sb.simulate   = true;
         else sb.ip = answer{1}; end
+      end
+      % check if IP address is reachable
+      ip = java.net.InetAddress.getByName(char(sb.ip));
+      if ~ip.isReachable(1000)
+        sb.simulate=true;
       end
       disp([ mfilename ': Connecting to ' sb.ip ])
       if ~sb.simulate
@@ -210,7 +218,7 @@ classdef starbook < handle
       getstatus(sb);
       getxy(sb);
       start(sb);
-      setspeed(sb, 6);
+      setspeed(sb, sb.speed);
       % create the timer for auto update
       sb.timer  = timer('TimerFcn', @TimerCallback, ...
           'Period', 5.0, 'ExecutionMode', 'fixedDelay', 'UserData', sb, ...
@@ -222,7 +230,7 @@ classdef starbook < handle
     end % starbook
     
     function load(self)
-      % load: load catalogs for objects, stars
+      % LOAD load catalogs for objects, stars
       disp([ mfilename ': Welcome ! Loading Catalogs:' ]);
       self.catalogs = load(mfilename);
       
@@ -241,8 +249,8 @@ classdef starbook < handle
     end % load
     
     function [s, rev] = getstatus(self)
-      % s=getstatus(sb): update object with current status
-      %    Return a string indicating status.
+      % GETSTATUS update object with current status
+      %    s=GETSTATUS(sb) Return a string indicating status.
       
       % If the mount is executing a gotoradec. GOTO=1
       % States power on  => INIT
@@ -292,7 +300,7 @@ classdef starbook < handle
     end % getstatus
     
     function revert(self)
-    % revert; trigger a mount reversal (when close to)
+    % REVERT trigger a mount reversal (when close to meridian)
     
       % must be in SCOP (IDLE) state
       if ~strcmp(self.state, 'SCOP'), return; end
@@ -307,17 +315,20 @@ classdef starbook < handle
     end % revert
 
     function val=gotoradec(self, ra_h, ra_min, dec_deg, dec_min)
-      % gotoradec(sb,ra_h, ra_min, dec_deg, dec_min): send the mount to given RA/DEC
-      % gotoradec(sb, ra, dec)
+      % GOTORADEC send the mount to given RA/DEC coordinates 
+      %   GOTORADEC(sb, ra_h, ra_min, dec_deg, dec_min)
+      %   GOTORADEC(sb, object_name)
+      %   GOTORADEC(sb, ra_h, dec_deg)
+      %
       % Right Ascension can be given as:
       %   separate H, M arguments
-      %   a single number
+      %   a single number in H (=DEG/15)
       %   a vector [H,M] or [H,M,S]
       %   a string such as HHhMMmSSs, HH:MM:SS, HHhMM, HH:MM
       %   an object name (such as 'M 51' or 'jupiter')
       % Declinaison can be given as:
       %   separate DEG, M arguments
-      %   a single number
+      %   a single number in DEG
       %   a vector [DEG,M] or [DEG,M,S]
       %   a string such as DEG°MM'SS", DEG°MM'
       %   not specified when giving a named object
@@ -328,7 +339,7 @@ classdef starbook < handle
       %     ERROR:FORMAT	
       %     ERROR:ILLEGAL STATE	
       %     ERROR:BELOW HORIZON
-      NL = sprintf('\n'); val='OK';
+      NL = sprintf('\n'); val='OK'; target_name = '';
       if nargin == 1
         prompt = {[ '{\bf \color{blue}Enter Right Ascension RA} ' NL ...
           '(HHhMMmSSs or HH:MM:SS or HH.hh) ' NL ...
@@ -359,7 +370,8 @@ classdef starbook < handle
         found = findobj(self, ra_h);
         if isempty(found)
           disp([ mfilename ': gotoradec: can not find object ' ra_h ])
-          return; 
+          return;
+        else target_name=ra_h;
         end
         [dec_deg, dec_min] = getdec(found.DEC);
         % Right Ascension
@@ -392,11 +404,17 @@ classdef starbook < handle
       else
         disp([ 'SIMU: ' cmd ]);
       end
+      if isempty(target_name)
+        target_name = sprintf('RA_%d_%f_DEC_%d_%f', ...
+            self.target_ra.h,    self.target_ra.min, ...
+            self.target_dec.deg, self.target_dec.min);
+      end
+      self.target_name = target_name;
       
     end % gotoradec
     
     function home(self)
-      % home(sb): send mount to home position
+      % HOME send mount to home position
       disp([ mfilename ': [' datestr(now) ']: home' ]);
       cmd = 'gohome?home=0';
       if ~self.simulate
@@ -408,7 +426,8 @@ classdef starbook < handle
     end % home
     
     function move(self, north, south, east, west)
-      % move(sb, north, south, east, west): move continuously the mount in given direction. 
+      % MOVE move continuously the mount in given direction. 
+      %   MOVE(sb, north, south, east, west) toggle movement along given directions
       %   Requires STOP to stop movement.
       %
       %   north: when 1, start move in DEC+
@@ -416,7 +435,7 @@ classdef starbook < handle
       %   east:  when 1, start move in RA-
       %   west:  when 1, start move in RA+
       %
-      % You may as well use move(sb, 'north') or move(sb, 'ra+') or move(sb, 'up')
+      % You may as well use MOVE(sb, 'north') or MOVE(sb, 'ra+') or MOVE(sb, 'up')
       % and similar stuff for other directions.
       % Can return: ERROR:FORMAT
       if nargin == 2
@@ -452,7 +471,8 @@ classdef starbook < handle
     end % move
     
     function setspeed(self, speed)
-      % setspeed(sb, speed): set the mount speed/zoom factor from 0(stop) - 8(fast)
+      % SETSPEED set the mount speed/zoom factor from 0(stop) - 8(fast)
+      %   SETSPEED(sb, speed) specify speed to use. Default is 6.
       % Can return: ERROR:FORMAT
       if nargin<2, return; end
       if     speed < 0, speed = 0;
@@ -468,12 +488,12 @@ classdef starbook < handle
     end % setspeed
     
     function s = getspeed(self)
-      % getspeed(sb): return current speed
+      % GETSPEED return current speed
       s = self.speed;
     end % getspeed
     
     function stop(self)
-      % stop(sb): stop any movement
+      % STOP stop any movement
       %  Can return "ERROR:ILLEGAL STATE".
       if ~self.simulate
         queue(self.ip, 'stop','OK');
@@ -487,7 +507,7 @@ classdef starbook < handle
     end % stop
     
     function start(self)
-      % start(sb): clear any error, and set the mount in move mode
+      % START clear any error, and set the mount in move mode
       %  Can return "ERROR:ILLEGAL STATE".
       if ~self.simulate
         queue(self.ip, 'start');
@@ -501,7 +521,7 @@ classdef starbook < handle
     end % start
     
     function reset(self)
-      % reset(sb): reset the StarBook to its start-up screen. 
+      % RESET reset the StarBook to its start-up screen (park) e.g. after HOME. 
       close(self);
       stop(self);
       if ~self.simulate
@@ -513,7 +533,7 @@ classdef starbook < handle
     end % reset
     
     function align(self)
-      % align(sb): align the mount to any preset RA/DEC target
+      % ALIGN align the mount to any preset RA/DEC target
       %   One should usually issue a gotoradec, and move the mount to center
       %   the actual location of the target, then issue an align.
       disp([ mfilename ': [' datestr(now) ']: align' ]);
@@ -526,7 +546,10 @@ classdef starbook < handle
     end % align
     
     function [s, rev]=getxy(self)
-      % getxy(sb): update mount motors coder values
+      % GETXY update mount motors coder values
+      %   xy = GETXY(sb) returns a string with coders
+      %
+      %   [xy, reverse] = GETXY(sb) also returns a 'close to reverse' flag
       
       rev = false;
       
@@ -601,7 +624,7 @@ classdef starbook < handle
         
         % must do a round in 24h
         % we display a message when moving slower than 1/2 the speed
-        if self.rate_ra < 0.5
+        if self.rate_ra < 0.5 && strcmp(self.state, 'SCOP')
           beep
           disp([ mfilename ': [' datestr(now) ']: WARNING: SLOW RA move' ])
           disp([ '    rate=' num2str(self.rate_ra) ' [sideral] delta=' num2str(delta_ra*1800) ' [min wrt meridian] ' s ])
@@ -616,7 +639,7 @@ classdef starbook < handle
     end % getxy
     
     function W = getscreen(self)
-      % im=getscreen(self): get an image of the current StarBook screen
+      % GETSCREEN get an RGB image of the current StarBook screen
       %   You may then plot the result with 'image(im)'
     
       % bitmap of what's on the screen. 320x240 12bit raw image file.
@@ -638,7 +661,7 @@ classdef starbook < handle
     end % getscreen
     
     function h = image(self)
-      % image(sb): show the StarBook screen and allow control using mouse/menu.
+      % IMAGE show the StarBook screen and allow control using mouse/menu.
       
       persistent screen_static
       
@@ -701,7 +724,7 @@ classdef starbook < handle
     end % image
     
     function update(self)
-      % update(sb): update the starbook status and image
+      % UPDATE update the starbook status and image
       [s, rev] = getstatus(self);
       if ishandle(self.figure)
         if self.autoscreen, image(self); end
@@ -709,7 +732,7 @@ classdef starbook < handle
     end % update
     
     function d = date(self)
-      % date(sb): get the starbook date/time
+      % DATE return the starbook date/time
       if ~self.simulate
         d = queue(self.ip, 'gettime',    'time=%d+%d+%d+%d+%d+%d');
         d = datestr(double(cell2mat(d)));
@@ -720,17 +743,17 @@ classdef starbook < handle
     end
     
     function h = plot(self)
-      % plot(sb): plot the starbook screen (same as image)
+      % PLOT plot the starbook screen (same as image)
       h = image(self);
     end % plot
     
     function z = zoom(self, z)
-      % zoom(sb): get/set zoom level
-      %
-      %   zoom(sb, 'in')
-      %   zoom(sb, 'out')
-      %   zoom(sb, 0-8)
-      %   zoom(sb, 'reset')
+      % ZOOM get/set zoom level
+      %   z = ZOOM(sb) get the zoom (speed) level.
+      %   ZOOM(sb, 'in')
+      %   ZOOM(sb, 'out')
+      %   ZOOM(sb, 0-8)
+      %   ZOOM(sb, 'reset') reset to default (6)
       if nargin == 2
         if ischar(z)
           switch lower(z)
@@ -751,7 +774,7 @@ classdef starbook < handle
     end % zoom
     
     function url = web(self)
-      % web(sb): display the starbook RA/DEC target in a web browser (sky-map.org)
+      % WEB display the starbook RA/DEC target in a web browser (sky-map.org)
       self.getstatus;
       url = sprintf([ 'http://www.sky-map.org/?ra=%f&de=%f&zoom=%d' ...
       '&show_grid=1&show_constellation_lines=1' ...
@@ -762,38 +785,34 @@ classdef starbook < handle
     end % web
     
     function url=help(self)
-      % help(sb): open the Help page
+      % HELP open the Help page
       url = fullfile('file:///',fileparts(which(mfilename)),'doc','StarBook.html');
       open_system_browser(url);
     end
     
-    function chart(self)
-      % chart(sb): open the skychart
-      if isempty(self.skychart) && exist('skychart')
-        % we search for any already opened skychart handle
-        h = findall(0, 'Tag','SkyChart','Type','figure');
-        if numel(h) > 1, h=h(1); end
-        if ~isempty(h)
-          sc = get(h, 'UserData');
-        else sc = skychart;
-        end
-        self.skychart = sc;
+    function connect(self, obj)
+      % CONNECT connect a Camera or a SkyChart to the StarBook
+      %   CONNECT(sb, sonyalpha) allow time-lapse and auto-center
+      %   CONNECT(sb, skychart)  allow goto from a SkyChart
+      if nargin < 2 || isempty(obj), return; end
+      if isa(obj, 'skychart')
+        sel.skychart = obj;
         % associate the starbook to the chart (connect it)
         connect(self.skychart, self);
-      end
-      if ~isempty(self.skychart)
         plot(self.skychart);
-      end
-    end
+      else return; end
+      disp([ mfilename ': connected ' class(obj) ])
+    end % camera
     
     function close(self)
-      % close(sb): close the starbook
+      % CLOSE close the starbook view
       if ishandle(self.figure); delete(self.figure); end
       self.figure = [];
     end
     
     function found = findobj(self, name)
-      % findobj(sc, name): find a given object in catalogs. Select it.
+      % FINDOBJ find a given object in catalogs. Select it.
+      %   id = findobj(sc, name) search for a given object and return ID
       catalogs = fieldnames(self.catalogs);
       found = [];
       
@@ -848,9 +867,9 @@ classdef starbook < handle
     end % findobj
     
     function g=grid(self, RA, DEC, n, da)
-      % grid(sb): return a 3x3 grid around given object or RA/DEC
-      % grid(sb, RA, DEC, n, da): build a n x n grid around RA/DEC with angular step da
-      % grid(sb, name,    n, da): build a n x n grid around named object
+      % GRID return a 3x3 grid around given object or RA/DEC
+      %   g = GRID(sb, RA, DEC, n, da) build a n x n grid around RA/DEC with angular step da
+      %   f = GRID(sb, name,    n, da) build a n x n grid around named object
       %
       %   The grid size can be given as n = [nDEC nRA] to specify a non-square grid
       %   as well as similarly for the angular step da = [dDEC dRA]
@@ -927,8 +946,7 @@ classdef starbook < handle
     end % grid
     
     function waitfor(self)
-      % waitfor: waits for the mount to be idle (not moving)
-      
+      % WAITFOR waits for the mount to be idle (not moving)
       flag = true;
       while flag
         flag = strfind(self.getstatus, 'GOTO');
@@ -937,13 +955,15 @@ classdef starbook < handle
     end % waitfor
     
     function [val, str] = queue(self, input, output)
+      % QUEUE send a command and return result
+      %   [val, str] = queue(self, input, output)
       if nargin < 2, val=[]; str=[]; return; end
       if nargin < 3, output = ''; end
       [val, str] = queue(self.ip, input, output);
     end % queue
     
     function disp(self)
-      % disp(s) : display StarBook object (details)
+      % DISP display StarBook object (details)
       
       if ~isempty(inputname(1))
         iname = inputname(1);
@@ -957,14 +977,16 @@ classdef starbook < handle
       end
       self.getstatus;
       fprintf(1,'%s = %s %s [%s]\n',iname, id, self.state, self.ip);
-      fprintf(1,'  RA:  %d+%.2f [h:min]\n', self.ra.h, self.ra.min);
-      fprintf(1,'  DEC: %d+%.2f [deg:min]\n', self.dec.deg, self.dec.min);
+      fprintf(1,'  RA:  %d+%.2f [h:min] (%f DEG)\n', self.ra.h, self.ra.min, ...
+        (self.ra.h+self.ra.min/60)*15);
+      fprintf(1,'  DEC: %d+%.2f [deg:min] (%f DEG)\n', self.dec.deg, self.dec.min, ...
+        (self.dec.deg+self.dec.min/60));
       fprintf(1,'  dX:  %f [min] time to meridian\n',self.delta_ra);
     
     end % disp
     
     function display(self)
-      % display(s) : display StarBook object (short)
+      % DISPLAY display StarBook object (short)
       
       if ~isempty(inputname(1))
         iname = inputname(1);
@@ -981,54 +1003,6 @@ classdef starbook < handle
           self.ra.h, self.ra.min, self.dec.deg, self.dec.min);
       fprintf(1,'%s = %s %s\n',iname, id, radec);
     end % display
-    
-    function annotate(self, filename)
-      % annotate: solve-plate an image (e.g. from a camera) in the background
-      % report when annotation has ended
-      
-      if isempty(self.executables)
-        self.executables = find_executables;
-      end
-
-      if isempty(self.executables.solve_field), return; end % not available
-      if ~isempty(self.process_java), return; end           % already running
-      
-      % get current mount location in [deg]
-      ra = self.ra;   % struct: h   min
-      dec= self.dec;  % struct: deg min
-      % convert to [deg]
-      ra_sb_deg = (ra.h+ra.min/60)*15;
-      dec_sb_deg= dec.deg+dec.min/60;
-      
-      % build 'astrometry' command (requires 'astrometry.net' local installation)
-      if isempty(self.process_dir)
-        d = tempname;
-        if ~isdir(d), mkdir(d); end
-        self.process_dir = d;
-      else d=self.process_dir;
-      end
-      
-      cmd = [ self.executables.solve_field  ];
-      cmd = [ cmd  ' '           filename ];
-      if ~isempty(self.executables.sextractor)
-        % highly improves annotation efficiency
-        cmd = [ cmd ' --use-sextractor' ];
-      end
-      cmd = [ cmd ' --dir '      d ];
-      cmd = [ cmd ' --new-fits ' fullfile(d, 'results.fits') ];
-      cmd = [ cmd ' --rdls '     fullfile(d, 'results.rdls') ];
-      cmd = [ cmd ' --corr '     fullfile(d, 'results.corr') ' --tag-all' ];
-      cmd = [ cmd ' --wcs='      fullfile(d, 'results.wcs') ];
-      % use mount location as guess (much faster to solve)
-      cmd = [ cmd ' --ra=' num2str(ra_sb_deg) ]
-      cmd = [ cmd ' --dec=' num2str(dec_sb_deg) ]
-      cmd = [ cmd ' --scale-low=0.5 --scale-high=2 '  ]; % field of view VMC200L
-      disp([ mfilename ': [' datestr(now) ']: ' cmd ]);
-      
-      % launch a Java asynchronous command
-      self.process_java = java.lang.Runtime.getRuntime().exec(cmd);
-      
-    end % annotate
   
   end % methods
   
@@ -1432,7 +1406,7 @@ function MenuCallback(src, evnt)
     if strcmp(checked,'off'), n='on'; else n='off'; end
     if ~isempty(strfind(lower(lab), 'view'))
       s.autoscreen   = strcmp(n, 'on');
-    else
+    elseif ~isempty(strfind(lower(lab), 'reverse'))
       s.autoreverse = strcmp(n, 'on');
     end
     set(src, 'Checked',n);
@@ -1460,60 +1434,7 @@ function TimerCallback(src, evnt)
   sb = get(src, 'UserData');
   if isvalid(sb), 
     try
-      sb.update; % getstatus
-      
-      % check if any astrometry job is running
-      if ~isempty(sb.process_java) && isjava(sb.process_java)
-        try
-          exitValue = sb.process_java.exitValue; % will raise error if process still runs
-          active  = 0;
-        catch ME
-          % still running
-          if isempty(sb.process_java) || ~isjava(sb.process_java)
-            active  = 0;
-          else
-            active  = 1;
-          end
-        end
-        % not active anymore: process has ended.
-        if ~active
-          disp([ mfilename ': [' datestr(now) ']: annotation ended.' ]);
-          disp([ mfilename ': astrometry: results in ' sb.process_dir ])
-          sb.process_java = [];
-          d = sb.process_dir;
-          % get results (center of field)
-          for file={'results.wcs','wcs.fits'}
-            if exist(fullfile(d, file{1}), 'file')
-              wcs  = read_fits(fullfile(d, file{1}));
-              
-              % get image center and print it
-              if isfield(wcs,'meta') && isfield(wcs.meta,'CRVAL1')
-                wcs = wcs.meta
-                wcs.CD = [ wcs.CD1_1 wcs.CD1_2 ; 
-                           wcs.CD2_1 wcs.CD2_2 ];
-                                    
-                % get central coordinates
-                sz  = [ wcs.IMAGEW wcs.IMAGEH ]/2;
-
-                [RA, Dec] = xy2sky_tan(wcs, sz(1), sz(2)); % MAAT Ofek (private)
-                RA=RA*180/pi; Dec=Dec*180/pi; % in [deg]
-                disp([ mfilename ': astrometry: center RA=' num2str(RA) ' Dec=' num2str(Dec) ])
-                rmdir(d,'s');
-                mkdir(d);
-                % get current mount coordinates in [deg]
-                
-                % get new coordinates in [deg]
-                
-                % convert to h:m and deg:m
-                
-                % goto there
-                
-              end % isfield CRVAL1
-            end % exist fits file
-          end % for file
-          
-        end
-      end
+      sb.update; % getstatus and image
     catch ME
       getReport(ME)
     end

@@ -139,8 +139,6 @@ classdef starbook < handle
     rate_ra   = 0;
     delta_ra  = 0;
     autoreverse=true;
-    ra_astrometry =[];
-    dec_astrometry=[];
     
   end % properties
   

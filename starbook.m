@@ -301,6 +301,7 @@ classdef starbook < handle
       end
       if strcmp(prev_state,'GOTO') && strcmp(self.status,'SCOP')
         notify(self,'gotoReached')
+        notify(self,'idle');
       end
       [coders, rev] = getxy(self);  % update coder values
       s = sprintf('RA=%d+%f DEC=%d+%f [%s] %s', ...
@@ -418,6 +419,7 @@ classdef starbook < handle
         disp([ 'SIMU: ' cmd ]);
       end
       notify(self,'gotoStart');
+      notify(self,'moving');
       if isempty(target_name)
         target_name = sprintf('RA_%d_%f_DEC_%d_%f', ...
             self.target_ra.h,    self.target_ra.min, ...

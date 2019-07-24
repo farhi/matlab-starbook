@@ -98,7 +98,7 @@ classdef starbook < handle
   % Other minor commands
   %   start(sb)      set/reset the StarBook in SCOPE mode
   %   getspeed(sb)   return the current zoom/mount speed 
-  %   getstatus(sb)  update the StarBook state
+  %   getstatus(sb)  get the StarBook state
   %   getxy(sb)      update motor coders     
   %   getscreen(sb)  get the StarBook image as an RGB matrix
   %   update(sb)     update status and image
@@ -128,7 +128,7 @@ classdef starbook < handle
     target_name=[];
     ra        = struct('h',  0,'min',0);       % current RA/DEC, as struct(h/deg,min)
     dec       = struct('deg',0,'min',0);
-    state     = 'INIT';
+    status    = 'INIT';
     x         = 0;        % coder values (0:round)
     y         = 0;
     round     = 8640000;  % full circle coder value
@@ -157,7 +157,11 @@ classdef starbook < handle
   end % properties
   
   events
+    gotoStart
     gotoReached
+    moving
+    idle
+    updated
   end
   
   methods
@@ -264,7 +268,7 @@ classdef starbook < handle
       %       In a menu  => USER
       
       % called in: update (TimerCallback), web, waitfor
-      prev_state = self.state;
+      prev_state = self.status;
       if ~self.simulate
         ret = queue(self.ip, 'getstatus', ...
           'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
@@ -291,28 +295,28 @@ classdef starbook < handle
       self.dec.deg = double(self.dec.deg);
       self.ra.min    = double(self.ra.min);
       self.dec.min = double(self.dec.min);
-      self.state   = char(ret{6});
+      self.status  = char(ret{6});
       if goto
-        self.state = 'GOTO';
+        self.status= 'GOTO';
       end
-      if strcmp(prev_state,'GOTO') && strcmp(self.state,'SCOP')
+      if strcmp(prev_state,'GOTO') && strcmp(self.status,'SCOP')
         notify(self,'gotoReached')
       end
       [coders, rev] = getxy(self);  % update coder values
       s = sprintf('RA=%d+%f DEC=%d+%f [%s] %s', ...
-        self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state, coders);
+        self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.status, coders);
       if rev && ~self.revert_flag && self.autoreverse
         disp(s);
         revert(self);
-      end 
-      
+      end
+      notify(self,'updated');
     end % getstatus
     
     function revert(self)
     % REVERT trigger a mount reversal (when close to meridian)
     
       % must be in SCOP (IDLE) state
-      if ~strcmp(self.state, 'SCOP'), return; end
+      if ~strcmp(self.status, 'SCOP'), return; end
       disp([ mfilename ': [' datestr(now) ']: reverting mount...'])
       self.revert_flag = true;
       % reposition scope to its coordinates
@@ -413,6 +417,7 @@ classdef starbook < handle
       else
         disp([ 'SIMU: ' cmd ]);
       end
+      notify(self,'gotoStart');
       if isempty(target_name)
         target_name = sprintf('RA_%d_%f_DEC_%d_%f', ...
             self.target_ra.h,    self.target_ra.min, ...
@@ -477,6 +482,7 @@ classdef starbook < handle
         [self.target_dec.deg self.target_dec.min] = getdec( ...
           self.target_dec.deg+self.target_dec.min/60 + north-south);
       end
+      notify(self, 'moving');
     end % move
     
     function setspeed(self, speed)
@@ -513,6 +519,7 @@ classdef starbook < handle
       end
       move(self, 0,0,0,0);
       self.revert_flag = false;
+      notify(self, 'idle');
     end % stop
     
     function start(self)
@@ -606,7 +613,7 @@ classdef starbook < handle
       
       % estimate sideral rate on X ---------------------------------------------
       % only in SCOPE state (not GOTO)
-      scop = strcmp(self.state, 'SCOP') | strcmp(self.state, 'USER');
+      scop = strcmp(self.status, 'SCOP') | strcmp(self.status, 'USER');
       
       % we reset the rate calculation every 60 sec
       if ~isempty(self.t_goto)
@@ -633,7 +640,7 @@ classdef starbook < handle
         
         % must do a round in 24h
         % we display a message when moving slower than 1/2 the speed
-        if self.rate_ra < 0.5 && strcmp(self.state, 'SCOP')
+        if self.rate_ra < 0.5 && strcmp(self.status, 'SCOP')
           beep
           disp([ mfilename ': [' datestr(now) ']: WARNING: SLOW RA move' ])
           disp([ '    rate=' num2str(self.rate_ra) ' [sideral] delta=' num2str(delta_ra*1800) ' [min wrt meridian] ' s ])
@@ -712,7 +719,7 @@ classdef starbook < handle
         set(gca, 'Position', [ 0 0 1 1 ]);
         set(self.figure, 'Name', ...
           sprintf('StarBook: RA=%d+%.2f DEC=%d+%.2f [%4s]', ...
-          self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.state));
+          self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.status));
         set(hi, 'UserData', ud);
         set(hi, 'ButtonDownFcn',        @ButtonDownCallback);
         
@@ -971,7 +978,7 @@ classdef starbook < handle
                  '<a href="matlab:image(' iname ');">plot</a>)'  ];
       end
       self.getstatus;
-      fprintf(1,'%s = %s %s [%s]\n',iname, id, self.state, self.ip);
+      fprintf(1,'%s = %s %s [%s]\n',iname, id, self.status, self.ip);
       fprintf(1,'  RA:  %d+%.2f [h:min] (%f DEG)\n', self.ra.h, self.ra.min, ...
         (self.ra.h+self.ra.min/60)*15);
       fprintf(1,'  DEC: %d+%.2f [deg:min] (%f DEG)\n', self.dec.deg, self.dec.min, ...
@@ -1283,7 +1290,7 @@ function ButtonDownCallback(src, evnt)
     return
   end
   % when in GOTO state, any key -> STOP
-  if strncmp(sb.state, 'GOT', 3)
+  if strncmp(sb.status, 'GOT', 3)
     sb.stop;
     return
   end

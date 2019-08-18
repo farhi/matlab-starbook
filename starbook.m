@@ -60,8 +60,8 @@ classdef starbook < handle
   %
   %  returns a string with current physical coordinates, as well as the status such as:
   %
-  %  - GOTO: indicates that the mount is moving
-  %  - SCOPE: indicates that the mount is idle
+  %  - GOTO: indicates that the mount is moving (MOVING)
+  %  - SCOPE: indicates that the mount is idle (TRACKING)
   %  - USER: waiting for physical User input
   %  - INIT: not ready yet
   %  - CHART: in Chart mode
@@ -369,7 +369,7 @@ classdef starbook < handle
           {sprintf('%dh%fm',   self.ra.h, self.ra.min), ...
            sprintf('%ddeg%fm', self.dec.deg, self.dec.min)}, options);
         if isempty(answer), return; end
-        if isempty(answer{2})
+        if isempty(answer{2}) || isempty(strtrim(answer{2}))
           val=gotoradec(self, answer{1});
         else
           val=gotoradec(self, answer{1}, answer{2});
@@ -428,6 +428,55 @@ classdef starbook < handle
       self.target_name = target_name;
       
     end % gotoradec
+    
+    function goto(self, varargin)
+      % GOTO Send the mount to given RA/DEC coordinates.
+      %   This is equivalent to GOTORADEC
+      gotoradec(self, varargin{:});
+    end % goto
+    
+    function ra=get_ra(self, option)
+      % GET_RA Return the current mount RA coordinates.
+      %   ra=GET_RA(s) Returns Right Ascension as [hh mm ss] in hours.
+      %
+      %   ra=GET_RA(s,'deg') Returns Right Ascension as a scalar in degrees.
+      %
+      %   ra=GET_RA(s,'target') Returns Target Right Ascension as [hh mm ss] in hours.
+      %   ra=GET_RA(s,'target deg') Returns the same in degrees.
+      if nargin < 2, option = ''; end
+      if strfind(option, 'target')
+        ra = double([ self.target_ra.h self.target_ra.min 0 ]);
+      else
+        ra = double([ self.ra.h self.ra.min 0 ]);
+      end
+      if strfind(option, 'deg')
+        ra = (ra(1)+ra(2)/60+ra(3)/3600)*15;
+      end
+    end
+    
+    function dec=get_dec(self, option)
+      % GET_DEC Return the current mount RA coordinates.
+      %   dec=GET_DEC(s) Returns Declinaison as [dd mm ss] in degrees.
+      %
+      %   dec=GET_DEC(s,'deg') Returns Declinaison as a scalar in degrees.
+      %
+      %   dec=GET_DEC(s,'target') Returns Target Declinaison as [dd mm ss] in degrees.
+      %   dec=GET_DEC(s,'target deg') Returns the same in degrees.
+      if nargin < 2, option = ''; end
+      if strfind(option, 'target')
+        dec = double([ self.target_dec.h self.target_dec.min 0 ]);
+      else
+        dec = double([ self.dec.deg self.dec.min 0 ]);
+      end
+      if strfind(option, 'deg')
+        dec = dec(1)+dec(2)/60+dec(3)/3600;
+      end
+    end
+    
+    function st = get_state(self)
+      % GET_STATE Return the mount state, e.g. MOVING, TRACKING.
+      st = self.status;
+    end
     
     function home(self)
       % HOME send mount to home position

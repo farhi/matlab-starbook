@@ -177,6 +177,11 @@ Requirements/Installation
 Matlab, no external toolbox. A Vixen StarBook controller for SX-type mounts.
 
 Just copy the files and go into the src directory. Then type commands above.
+Limitations: The StarBook S and StarBook Ten may be partly supported (the screen image is not handled).
+
+We recommend to install as well:
+
+- Stellarium, for a nice looking view of the sky.
 
 Credits
 -------

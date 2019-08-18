@@ -57,9 +57,9 @@ You may directly point to a named object or coordinates with:
 
 ```matlab
 >> sb=starbook;
->> sb.gotoradec('M 51');
->> sb.gotoradec('13h29m52.30s','+47d11m40.0s');
->> sb.gotoradec('jupiter');
+>> sb.goto('M 51');
+>> sb.goto('13h29m52.30s','+47d11m40.0s');
+>> sb.goto('jupiter');
 ```
 
 Valid names include usual names (such as Betelgeuse, Rigel, Capella, Orion nebula, ...), as well as the major Catalogs such as:
@@ -111,7 +111,7 @@ A typical programming for a night could be, after the mount alignment:
 addpath('/path/to/matlab-starbook')
 sb=starbook('192.168.1.19');
 for target={'M 51','M 81','M 101'}
-  sb.gotoradec(target{1});
+  sb.goto(target{1});
   waitfor(sb);
   imwrite(sb.getscreen, [ 'starbook_' datestr(now, 30) '.png' ])
   pause(1800)
@@ -120,7 +120,7 @@ home(sb); % back to safe position, to avoid dew on the mirror
 ```
 Then simply record images regularly with your CCD/camera. Some will be blurred when the mount moves, but this is a rather fast operation, so only few images are sacrificed. We recommend you to plan your observations using Stellarium (http://stellarium.org/) and http://sky-map.org
 
-**Building a grid (panorama)**
+**Building a grid (panorama/stitching)**
 
 You may prepare a grid around a target in view to assemble larger panorama view.
 
@@ -128,7 +128,7 @@ The **grid** method returns a list of positions, which you can send the mount to
 
 ```matlab
 for target=sb.grid('M 51'); 
-  sb.gotoradec(target); 
+  sb.goto(target); 
   waitfor(sb); % wait for position
   pause(1800); % wait for acquisition (DSLR)
 end
@@ -140,17 +140,20 @@ Methods
 -------
 
 - **starbook(ip)**:   connect to a StarBook controller
-- **gotoradec(sb, ra, dec)**: send StarBook to RA/DEC (given in HH:MM and Deg:MM). When the RA/DEC are not given, a dialogue is shown. You can also enter a named object.
-- **gotoradec(sb, 'M 51')**: send StarBook to a named object.
+- **goto(sb, ra, dec)**: send StarBook to RA/DEC (given in HH:MM and Deg:MM). When the RA/DEC are not given, a dialogue is shown. You can also enter a named object.
+- **goto(sb, 'M 51')**: send StarBook to a named object.
 - **move(sb, n,s,e,w)**: move the SB in given direction. Use stop to abort.
 - **align(sb)**:      align current coordinates to RA/DEC target
-- **stop(sb)**:       stop the mount (e.g. during move/gotoradec)
+- **stop(sb)**:       stop the mount (e.g. during move/goto)
 - **setspeed(sb)**:   set the current zoom/mount speed 0:stop - 8:fast
 - **image(sb)**:      display the StarBook image (only for 320*240 screen)
 - **home(sb)**:       send the SB to its HOME position
 - **help(sb)**:       open the Help page
 - **grid**:           build a grid around target
 - **waitfor(sb)**:    wait for the mount to stop moving
+- **get_ra(sb)**:     return the current RA coordinate
+- **get_dec(sb)**:    return the current DEC coordinate
+- **get_state(sb)**:  return the current mount state (GOTO/MOVING, SCOPE/IDLE)
 
 Other minor commands
 

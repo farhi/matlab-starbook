@@ -488,6 +488,11 @@ classdef starbook < handle
       st = self.status;
     end
     
+    function c = get_catalogs(self)
+      % GET_CATALOGS Get the loaded catalogs
+      c = self.catalogs;
+    end
+    
     function home(self)
       % HOME Send mount to home position.
       disp([ mfilename ': [' datestr(now) ']: home' ]);

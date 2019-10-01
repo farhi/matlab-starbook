@@ -110,6 +110,7 @@ classdef starbook < handle
   % - getstatus(sb)  get the StarBook state
   % - getxy(sb)      update motor coders     
   % - getscreen(sb)  get the StarBook image as an RGB matrix
+  % - get_state(sb)  get the mount state.
   % - update(sb)     update status and image
   % - plot(sb)       same as image(sb)
   % - close(sb)      close the screen view

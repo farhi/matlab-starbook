@@ -830,6 +830,11 @@ classdef starbook < handle
       h = image(self);
     end % plot
     
+    function h = scatter(self, varargin)
+      % SCATTER Display RA/DEC coordinates on the SkyChart plot.
+      disp([ mfilename ': scatter: Not implemented.' ])
+    end
+    
     function z = zoom(self, z)
       % ZOOM Get/set zoom level.
       %   z = ZOOM(sb) get the zoom (speed) level.

@@ -315,14 +315,22 @@ classdef starbook < handle
         notify(self,'idle');
       end
       [coders, rev] = getxy(self);  % update coder values
-      s = sprintf('RA=%d+%f DEC=%d+%f [%s] %s', ...
-        self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.status, coders);
+      s = [ char(self) ' ' coders ];
       if rev && ~self.revert_flag && self.autoreverse
         disp(s);
         revert(self);
       end
       notify(self,'updated');
     end % getstatus
+    
+    function s=char(self)
+      % CHAR Return the mount state as a short string.
+      s = sprintf('RA=%d+%f DEC=%d+%f [%s]', ...
+        self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.status);
+      if ~strncmp(self.target_name,'RA_',3)
+        s = [ s ' ' self.target_name ];
+      end
+    end % char
     
     function revert(self)
     % REVERT Trigger a mount reversal (when close to meridian).
@@ -754,7 +762,7 @@ classdef starbook < handle
       tag = [ 'StarBook_' strrep(self.ip, '.', '_') ];
       h = findall(0, 'Tag', tag);
       if isempty(h)
-        h = image_build(tag, self.ip, ud, self);
+        h = build_interface(tag, self.ip, ud, self);
         set(0, 'CurrentFigure',h);
         if strcmp(self.timer.Running, 'off') start(self.timer); end
       else
@@ -784,9 +792,7 @@ classdef starbook < handle
         % get status and display
         hi = image(im);
         set(gca, 'Position', [ 0 0 1 1 ]);
-        set(self.figure, 'Name', ...
-          sprintf('StarBook: RA=%d+%.2f DEC=%d+%.2f [%4s]', ...
-          self.ra.h, self.ra.min, self.dec.deg, self.dec.min, self.status));
+        set(self.figure, 'Name', [ 'StarBook: ' char(self) ]);
         set(hi, 'UserData', ud);
         set(hi, 'ButtonDownFcn',        @ButtonDownCallback);
         
@@ -878,11 +884,28 @@ classdef starbook < handle
       open_system_browser(url);
     end
     
+    function location(sb)
+      % LOCATION Show the current GPS location on a Map.
+      e = double(sb.place{2})+double(sb.place{3})/60;
+      if sb.place{1} == 'W', e=-e; end
+      n = double(sb.place{5})+double(sb.place{6})/60;
+      if sb.place{4} == 'S', n=-n; end
+      url = sprintf('https://maps.google.fr/?q=%f,%f', n, e);
+      % open in system browser
+      open_system_browser(url);
+    end % location
+    
     function close(self)
       % CLOSE Close the starbook view.
       if ishandle(self.figure); delete(self.figure); end
       self.figure = [];
     end
+    
+    function delete(self)
+      % DELETE Close connection
+      stop(self);
+      close(self);
+    end % delete
     
     function found = findobj(self, name)
       % FINDOBJ Find a given object in catalogs.
@@ -1081,6 +1104,33 @@ classdef starbook < handle
           self.ra.h, self.ra.min, self.dec.deg, self.dec.min);
       fprintf(1,'%s = %s %s\n',iname, id, radec);
     end % display
+    
+    function about(sb)
+      % ABOUT Display a dialogue about the mount status and software.
+      try
+        im = imread(fullfile(fileparts(which(mfilename)),'doc','Starbook.jpg'));
+      catch
+        im = '';
+      end
+      msg = { [ 'StarBook ' sb.version ], ...
+                'A Matlab interface to control a Vixen StarBook SX mount', ...
+                getstatus(sb), ...
+                [ 'Motor coders XY=' num2str([sb.x sb.y]) ], ...
+                [ 'Sideral rate=   ' num2str(sb.rate_ra) ], ...
+                [ 'Time wrt Meridian= ' num2str(sb.delta_ra)  ' [min]' ], ...
+                [ 'http://' sb.ip ], ...
+                '(c) E. Farhi GPL2 2018 <https://github.com/farhi/matlab-starbook>' };
+      if ~isempty(im)
+        msgbox(msg,  'About StarBook', 'custom', im);
+      else
+        helpdlg(msg, 'About StarBook');
+      end
+    end % about
+    
+    function id = identify(self)
+      % IDENTIFY Read the mount identification string.
+      id = [ 'Vixen StarBook ' self.version ' on ' self.ip ];
+    end % identify
   
   end % methods
   
@@ -1252,8 +1302,8 @@ function ret=open_system_browser(url)
 end % open_system_browser
 
 
-function h = image_build(tag, ip, ud, self)
-  % IMAGE_BUILD build the main GUI
+function h = build_interface(tag, ip, ud, self)
+  % build_interface build the main GUI
   h = figure('Tag',tag, 'Name', [ 'StarBook: ' ip ], ...
     'MenuBar','none', 'ToolBar','none', ...
     'WindowButtonUpFcn',    @ButtonUpCallback, ...
@@ -1296,7 +1346,7 @@ function h = image_build(tag, ip, ud, self)
   uimenu(m, 'Label', 'Help', 'Callback', @MenuCallback);
   uimenu(m, 'Label', 'About StarBook', 'Callback', @MenuCallback, ...
     'Separator','on');
-end % image_build
+end % build_interface
 
 % ------------------------------------------------------------------------------
 % Callbacks
@@ -1399,33 +1449,9 @@ function ButtonDownCallback(src, evnt)
     disp([ mfilename ': [' datestr(now) ']: ' sb.getstatus ]);
     sb.image;
   case {'about','about starbook'}
-    try
-      im = imread(fullfile(fileparts(which(mfilename)),'doc','Starbook.jpg'));
-    catch
-      im = '';
-    end
-    msg = { [ 'StarBook ' sb.version ], ...
-              'A Matlab interface to control a Vixen StarBook SX mount', ...
-              getstatus(sb), ...
-              [ 'Motor coders XY=' num2str([sb.x sb.y]) ], ...
-              [ 'Sideral rate=   ' num2str(sb.rate_ra) ], ...
-              [ 'Time wrt Meridian= ' num2str(sb.delta_ra)  ' [min]' ], ...
-              [ 'http://' sb.ip ], ...
-              '(c) E. Farhi GPL2 2018 <https://github.com/farhi/matlab-starbook>' };
-    if ~isempty(im)
-      msgbox(msg,  'About StarBook', 'custom', im);
-    else
-      helpdlg(msg, 'About StarBook');
-    end
+    about(sb);
   case {'place','location','open location (gps) on <google maps>'}
-    e = double(sb.place{2})+double(sb.place{3})/60;
-    if sb.place{1} == 'W', e=-e; end
-    n = double(sb.place{5})+double(sb.place{6})/60;
-    if sb.place{4} == 'S', n=-n; end
-    url = sprintf('https://maps.google.fr/?q=%f,%f', n, e);
-    % open in system browser
-    disp(url)
-    open_system_browser(url);
+    location(sb);
   case {'goto','gotoradec','target','goto ra/dec...'}
     sb.goto;
   case {'help'}

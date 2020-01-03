@@ -201,10 +201,10 @@ classdef starbook < handle
       % check if IP address is reachable
       ip = java.net.InetAddress.getByName(char(sb.ip));
       if ~ip.isReachable(1000)
-        disp([ mfilename ': WARNING: can not connect to ' sb.ip '. Using simulate mode.' ])  
+        disp([ '[' datestr(now) '] ' mfilename ': WARNING: can not connect to ' sb.ip '. Using simulate mode.' ])  
         sb.simulate=true;
       else
-        disp([ mfilename ': Connecting to ' sb.ip ])
+        disp([ '[' datestr(now) '] ' mfilename ': Connecting to ' sb.ip ])
       end
       
       if ~sb.simulate
@@ -212,7 +212,7 @@ classdef starbook < handle
           ret = queue(sb.ip, 'getversion', 'version=%s');
         catch ME
           disp(getReport(ME));
-          disp([ mfilename ': Switching to simulate mode.' ])
+          disp([ '[' datestr(now) '] ' mfilename ': Switching to simulate mode.' ])
           sb.simulate   = true;
           ret           = sb.version;
         end
@@ -244,14 +244,14 @@ classdef starbook < handle
           'Period', 5.0, 'ExecutionMode', 'fixedDelay', 'UserData', sb, ...
           'Name', mfilename);
       % display screen
-      disp([ mfilename ': [' datestr(now) ']: Welcome to StarBook ' sb.version ])
+      disp([ '[' datestr(now) '] ' mfilename ': Welcome to StarBook ' sb.version ])
       image(sb); % also start the timer
       
     end % starbook
     
     function load(self)
       % LOAD load catalogs for objects, stars
-      disp([ mfilename ': Welcome ! Loading Catalogs:' ]);
+      disp([ '[' datestr(now) '] ' mfilename ': Welcome ! Loading Catalogs:' ]);
       self.catalogs = load(mfilename);
       
       % display available catalogs
@@ -262,7 +262,7 @@ classdef starbook < handle
           if isfield(self.catalogs.(name), 'Description')
             desc = self.catalogs.(name).Description;
           else desc = ''; end
-          disp([ mfilename ': ' name ' with ' num2str(num) ' entries.' ]);
+          disp([ '[' datestr(now) '] ' mfilename ': ' name ' with ' num2str(num) ' entries.' ]);
           disp([ '  ' desc ])
         end
       end
@@ -337,7 +337,7 @@ classdef starbook < handle
     
       % must be in SCOP (IDLE) state
       if ~strcmp(self.status, 'SCOP'), return; end
-      disp([ mfilename ': [' datestr(now) ']: reverting mount...'])
+      disp([ '[' datestr(now) '] ' mfilename ': reverting mount...'])
       self.revert_flag = true;
       % reposition scope to its coordinates
       val=self.goto(self.ra, self.dec);
@@ -402,7 +402,7 @@ classdef starbook < handle
         end
         found = findobj(self, ra_h);
         if isempty(found)
-          disp([ mfilename ': goto: can not find object ' ra_h ])
+          disp([ '[' datestr(now) '] ' mfilename ': goto: can not find object ' ra_h ])
           return;
         else target_name=ra_h;
         end
@@ -420,7 +420,7 @@ classdef starbook < handle
         % Right Ascension
         [ra_h, ra_min]     = getra(ra_h);
       elseif nargin < 5
-        disp([ mfilename ': goto: wrong number of input.' ])
+        disp([ '[' datestr(now) '] ' mfilename ': goto: wrong number of input.' ])
         return
       end
       self.target_ra.h   = ra_h;
@@ -431,7 +431,7 @@ classdef starbook < handle
       cmd = sprintf('gotoradec?RA=%d+%f&DEC=%d+%f', ...
         self.target_ra.h,    self.target_ra.min, ...
         self.target_dec.deg, self.target_dec.min);
-      disp([ mfilename ': [' datestr(now) ']: ' cmd ]);
+      disp([ '[' datestr(now) '] ' mfilename ': ' cmd ]);
       if ~self.simulate
         val=queue(self.ip, cmd, 'OK');
       else
@@ -504,7 +504,7 @@ classdef starbook < handle
     
     function home(self)
       % HOME Send mount to home position.
-      disp([ mfilename ': [' datestr(now) ']: home' ]);
+      disp([ '[' datestr(now) '] ' mfilename ': home' ]);
       cmd = 'gohome?home=0';
       if ~self.simulate
         queue(self.ip, cmd,'OK');
@@ -513,6 +513,11 @@ classdef starbook < handle
         goto(self, 0, 0);
       end
     end % home
+    
+    function park(self, varargin)
+      % PARK Send the mount to a reference PARK position (home).
+      home(self);
+    end % park
     
     function move(self, north, south, east, west)
       % MOVE Move continuously the mount in given direction.
@@ -616,7 +621,7 @@ classdef starbook < handle
       close(self);
       stop(self);
       if ~self.simulate
-        disp([ mfilename ': [' datestr(now) ']: reset (park). Use "start" to restart.' ]);
+        disp([ '[' datestr(now) '] ' mfilename ': reset (park). Use "start" to restart.' ]);
         cmd = [ 'http://' self.ip '/reset?reset' ];
         url = java.net.URL(cmd);
         url.openConnection;
@@ -627,7 +632,7 @@ classdef starbook < handle
       % ALIGN Align the mount to any preset RA/DEC target.
       %   One should usually issue a GOTO, and move the mount to center
       %   the actual location of the target, then issue an align.
-      disp([ mfilename ': [' datestr(now) ']: align' ]);
+      disp([ '[' datestr(now) '] ' mfilename ': align' ]);
       if ~self.simulate
         queue(self.ip, 'align','OK');
       else
@@ -635,6 +640,23 @@ classdef starbook < handle
       end
       % display target and current RA/DEC
     end % align
+    
+    function sync(self)
+      % SYNC Synchronise current RA/DEC with last target.
+      %   SYNC(s) tells the mount that the target (current) RA/DEC corresponds 
+      %   with the previously defined target (from GOTO).
+      align(self);
+    end % sync
+    
+    function h = shift(self, varargin)
+      % SHIFT Move the mount by a given amount on both axes. The target is kept.
+      disp([ '[' datestr(now) '] ' mfilename ': shift: Not implemented.' ])
+    end
+    
+    function settings(self)
+      % SETTINGS Display a dialogue to set board settings.
+      disp([ '[' datestr(now) '] ' mfilename ': SETTINGS: Not implemented.' ])
+    end % settings
     
     function [s, rev]=getxy(self)
       % GETXY Update mount motors coder values.
@@ -667,7 +689,7 @@ classdef starbook < handle
       delta_ra = (double(self.round/4) - abs(double(self.x)))/double(self.round);
       if delta_ra*100 <= -0.2
         beep
-        disp([ mfilename ': [' datestr(now) ']: mount is close to revert on X (east-west=RA) motor. ' ])
+        disp([ '[' datestr(now) '] ' mfilename ': mount is close to revert on X (east-west=RA) motor. ' ])
         disp([ '    Delta=' num2str(delta_ra*100) ' % i.e. ' ...
                num2str(abs(delta_ra)*1800) ' min after meridian.' ])
       end
@@ -675,7 +697,7 @@ classdef starbook < handle
       % on DEC, y can reach +/- round, then has to revert
       delta_dec = double(abs(abs(self.y) -  self.round))/double(self.round);
       if delta_dec < 0.10
-        disp([ mfilename ': [' datestr(now) ']: mount is close to revert on Y (north-south=DEC) motor. Delta='...
+        disp([ '[' datestr(now) '] ' mfilename ': mount is close to revert on Y (north-south=DEC) motor. Delta='...
         num2str(delta_dec*100) ' % i.e. ' num2str(delta_dec*360) ' deg' ])
       end
 
@@ -717,7 +739,7 @@ classdef starbook < handle
         % we display a message when moving slower than 1/2 the speed
         if self.rate_ra < 0.5 && strcmp(self.status, 'SCOP')
           beep
-          disp([ mfilename ': [' datestr(now) ']: WARNING: SLOW RA move' ])
+          disp([ '[' datestr(now) '] ' mfilename ': WARNING: SLOW RA move' ])
           disp([ '    rate=' num2str(self.rate_ra) ' [sideral] delta=' num2str(delta_ra*1800) ' [min wrt meridian] ' s ])
           disp('    Check cables and tube. RA (X) is stuck ?' );
           if delta_ra < 0
@@ -838,7 +860,7 @@ classdef starbook < handle
     
     function h = scatter(self, varargin)
       % SCATTER Display RA/DEC coordinates on the SkyChart plot.
-      disp([ mfilename ': scatter: Not implemented.' ])
+      disp([ '[' datestr(now) '] ' mfilename ': scatter: Not implemented.' ])
     end
     
     function z = zoom(self, z)
@@ -951,7 +973,7 @@ classdef starbook < handle
       end
 
       if ~isempty(found)
-        disp([ mfilename ': Found object ' name ' as: ' found.NAME ])
+        disp([ '[' datestr(now) '] ' mfilename ': Found object ' name ' as: ' found.NAME ])
         if found.DIST > 0
           disp(sprintf('  %s: Magnitude: %.1f ; Type: %s ; Dist: %.3g [ly]', ...
             found.catalog, found.MAG, found.TYPE, found.DIST*3.262 ));
@@ -1158,7 +1180,7 @@ function [val, str] = queue(ip, input, output)
   elseif ~isempty(output)
     % expect a specific string as answer
     if isempty(strfind(str, output))
-      disp([ mfilename ': [' datestr(now) ']: WARNING: unexpected answer from StarBook.' ])
+      disp([ '[' datestr(now) '] ' mfilename ': WARNING: unexpected answer from StarBook.' ])
       disp(cmd)
       if strfind(str, 'ILLEGAL STATE')
         str='ERROR:ILLEGAL STATE';
@@ -1237,7 +1259,7 @@ function [ra_h, ra_min] = getra(ra)
       ra_h = ra(1);     ra_min = abs(ra(2))+abs(ra(3)/60);
     end
   else
-    disp([ mfilename ': invalid RA.' ])
+    disp([ '[' datestr(now) '] ' mfilename ': invalid RA.' ])
     disp(ra)
   end
   if nargout == 1
@@ -1275,7 +1297,7 @@ function [dec_deg, dec_min] = getdec(dec)
       dec_deg = dec(1);   dec_min = abs(dec(2))+abs(dec(3)/60);
     end
   else
-    disp([ mfilename ': invalid DEC' ])
+    disp([ '[' datestr(now) '] ' mfilename ': invalid DEC' ])
     disp(dec)
   end
   if nargout == 1
@@ -1459,7 +1481,7 @@ function ButtonDownCallback(src, evnt)
   case 'close'
     close(sb);
   otherwise
-    disp([ mfilename ': unknown action ' lab ]);
+    disp([ '[' datestr(now) '] ' mfilename ': unknown action ' lab ]);
   end
 end % ButtonDownCallback
 

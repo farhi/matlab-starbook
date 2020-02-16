@@ -295,7 +295,7 @@ classdef starbook < handle
         % compute next position
         DEC= self.dec.deg+self.dec.min/60 + dDEC;
         [RA_h, RA_min]     = getra(self.ra.h+self.ra.min/60 + dRA);
-        [DEC_deg, DEC_min] = getdec(self.dec.deg+self.dec.min/60 + dDEC);
+        [DEC_deg, DEC_min] = getdec(self.dec.deg+sign(self.dec.deg)*self.dec.min/60 + dDEC);
         if abs(dRA) > .01 || abs(dDEC) > .01
           goto=1;
         else goto=0; end
@@ -560,7 +560,7 @@ classdef starbook < handle
         [self.target_ra.h self.target_ra.min] = getra( ...
           self.target_ra.h+self.target_ra.min/60 + east-west);
         [self.target_dec.deg self.target_dec.min] = getdec( ...
-          self.target_dec.deg+self.target_dec.min/60 + north-south);
+          self.target_dec.deg+sign(self.target_dec.deg)*self.target_dec.min/60 + north-south);
       end
       notify(self, 'moving');
     end % move
@@ -1100,7 +1100,7 @@ classdef starbook < handle
       fprintf(1,'  RA:  %d+%.2f [h:min] (%f DEG)\n', self.ra.h, self.ra.min, ...
         (self.ra.h+self.ra.min/60)*15);
       fprintf(1,'  DEC: %d+%.2f [deg:min] (%f DEG)\n', self.dec.deg, self.dec.min, ...
-        (self.dec.deg+self.dec.min/60));
+        (self.dec.deg+self.dec.min/60*sign(self.dec.deg)));
       fprintf(1,'  dX:  %f [min] time to meridian\n',self.delta_ra);
       if ~isempty(self.target_name)
         fprintf(1,'  Last target:  %s\n', self.target_name);
@@ -1290,7 +1290,9 @@ function [dec_deg, dec_min] = getdec(dec)
   end
   if isnumeric(dec)
     if isscalar(dec)
-      dec_deg = floor(dec); dec_min = abs(dec - dec_deg)*60;
+      if dec > 0, dec_deg = floor(dec); 
+      else dec_deg = ceil(dec); end
+      dec_min = abs(dec - dec_deg)*60;
     elseif numel(dec) == 2
       dec_deg = dec(1);   dec_min = abs(dec(2));
     elseif numel(dec) == 3

@@ -1,7 +1,7 @@
 # matlab-starbook
 Control a Vixen SX mount StarBook from Matlab
 
-![Image of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/Starbook.jpg)
+![Image of StarBook](https://github.com/farhi/matlab-starbook/blob/master/%40starbook/doc/Starbook.jpg)
 
 Purpose
 -------
@@ -30,7 +30,7 @@ to establish the connection. Use 'sim' as IP to connect to a simulated StarBook.
 The buttons are active in a similar way to the physical ones. The mouse wheel allows to zoom in/out, and the display is regularly updated (5 sec).
 You can access more actions from the top menu.
 
-![Screen of StarBook](https://github.com/farhi/matlab-starbook/blob/master/doc/screen_valid.png)
+![Screen of StarBook](https://github.com/farhi/matlab-starbook/blob/master/%40starbook/doc/screen_valid.png)
 
 You may close this view, and re-open it anytime, without affecting the StarBook itself. If the StarBook image can not be retrieved (e.g with a StarBook S and StarBook Ten), a static image is used, and buttons are active as RA+/RA-/DEC+/DEC- (arrows on the right) and ZOOM+/ZOOM- (up/down arrows on the left).
 

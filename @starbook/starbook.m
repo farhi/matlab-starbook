@@ -119,8 +119,8 @@ classdef starbook < handle
   % - date(sb)       get the starbook date/time
   % - findobj(sb,obj) search for an object name in star/DSO catalogs
   % - reset(sb)      hibernate the mount. Use start(sb) to restart.
-  % - queue(sb, cmd)  send a command
-  % - revert(sb)      attempt a mount reversal. Must be close within 5 min.
+  % - queue(sb, cmd) send a command
+  % - revert(sb)     attempt a mount reversal. Must be close within 5 min.
   %
   % Credits: 
   % =======
@@ -281,8 +281,13 @@ classdef starbook < handle
       % called in: update (TimerCallback), web, waitfor
       prev_state = self.status;
       if ~self.simulate
-        ret = queue(self.ip, 'getstatus', ...
-          'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
+        try
+          ret = queue(self.ip, 'getstatus', ...
+            'RA=%d+%f&DEC=%d+%f&GOTO=%d&STATE=%4s');
+        catch
+          disp([ '[' datestr(now) '] ' mfilename ': halting monitoring. Restart it with "start" method.' ]);
+          stop(self.timer)
+        end
       else
         % we simulate a move from current to target RA/DEC
         dRA   =  (self.target_ra.h+self.target_ra.min/60) ...
